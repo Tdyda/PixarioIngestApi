@@ -2,7 +2,7 @@ namespace Pixario.Ingest.Application.Ports;
 
 public interface IImageProcessingPipeline
 {
-    Task<string> RunAsync(PipelineRequest request, CancellationToken ct);
+    Task<IReadOnlyList<string>> RunAsync(PipelineRequest request, CancellationToken ct);
 }
 
 public sealed record PipelineRequest(
