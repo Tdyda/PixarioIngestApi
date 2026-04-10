@@ -24,15 +24,11 @@ Thumbs.db
 !.env.example
 
 # --- App settings (secrets w środku) ---
-**/appsettings.Development.json
 **/appsettings.*.json
-!**/appsettings.json
-!**/appsettings.*.example.json
-
-# --- Runtime / uploads ---
-uploads/
-**/uploads/
+**/appsettings.json
+!**/appsettings.Example.json
 
 # --- Runtime / uploads ---
 scripts
 .github
+notes

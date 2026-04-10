@@ -6,7 +6,7 @@ RUN dotnet publish Pixario.Ingest.Worker/Pixario.Ingest.Worker.csproj \
     -c Release \
     -o /out
 
-FROM mcr.microsoft.com/dotnet/runtime:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 
 COPY --from=build /out .

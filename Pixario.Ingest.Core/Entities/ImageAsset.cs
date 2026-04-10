@@ -6,18 +6,17 @@ public class ImageAsset
     {
     }
 
-    public ImageAsset(Guid imageId, string fileName, string storagePath, long size)
+    public ImageAsset(Guid id, string fileName, string storagePath, long size)
     {
-        ImageId = imageId;
+        Id = id;
         FileName = fileName;
         StoragePath = storagePath;
         Size = size;
     }
 
-    public Guid ImageId { get; set; }
+    public Guid Id { get; set; }
     public string FileName { get; set; }
     public string StoragePath { get; set; }
     public long Size { get; set; }
-
-    public Guid JobId { get; set; }
+    public Guid BatchId { get; set; }
 }

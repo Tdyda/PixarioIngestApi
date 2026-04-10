@@ -24,19 +24,19 @@ namespace Pixario.Ingest.Infrastructure.Migrations
 
             modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageAsset", b =>
                 {
-                    b.Property<Guid>("ImageId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)")
-                        .HasColumnName("image_id");
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("batch_id");
 
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("longtext")
                         .HasColumnName("file_name");
-
-                    b.Property<Guid>("JobId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("job_id");
 
                     b.Property<long>("Size")
                         .HasColumnType("bigint")
@@ -47,19 +47,19 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("storage_path");
 
-                    b.HasKey("ImageId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("JobId");
+                    b.HasIndex("BatchId");
 
                     b.ToTable("image_assets", (string)null);
                 });
 
-            modelBuilder.Entity("Pixario.Ingest.Core.Entities.UploadJob", b =>
+            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageRetouchBatch", b =>
                 {
-                    b.Property<Guid>("JobId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)")
-                        .HasColumnName("job_id");
+                        .HasColumnName("id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
@@ -70,23 +70,69 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                         .HasColumnType("longtext")
                         .HasColumnName("status");
 
-                    b.HasKey("JobId");
+                    b.HasKey("Id");
 
-                    b.ToTable("upload_jobs", (string)null);
+                    b.ToTable("retouch_batch", (string)null);
+                });
+
+            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageRetouchJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("batch_id");
+
+                    b.Property<Guid>("ImageId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId");
+
+                    b.HasIndex("ImageId")
+                        .IsUnique();
+
+                    b.ToTable("retouch_jobs", (string)null);
                 });
 
             modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageAsset", b =>
                 {
-                    b.HasOne("Pixario.Ingest.Core.Entities.UploadJob", null)
+                    b.HasOne("Pixario.Ingest.Core.Entities.ImageRetouchBatch", null)
                         .WithMany("Images")
-                        .HasForeignKey("JobId")
+                        .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Pixario.Ingest.Core.Entities.UploadJob", b =>
+            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageRetouchJob", b =>
+                {
+                    b.HasOne("Pixario.Ingest.Core.Entities.ImageRetouchBatch", null)
+                        .WithMany("Jobs")
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Pixario.Ingest.Core.Entities.ImageAsset", "Image")
+                        .WithOne()
+                        .HasForeignKey("Pixario.Ingest.Core.Entities.ImageRetouchJob", "ImageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Image");
+                });
+
+            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageRetouchBatch", b =>
                 {
                     b.Navigation("Images");
+
+                    b.Navigation("Jobs");
                 });
 #pragma warning restore 612, 618
         }

@@ -12,7 +12,9 @@ public sealed class ApiKeyMiddleware(IOptions<ApiKeyOptions> options) : IMiddlew
     {
         var path = context.Request.Path.Value ?? "";
         if (path.StartsWith("/health", StringComparison.OrdinalIgnoreCase) ||
-            path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase))
+            path.StartsWith("/swagger", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("/scalar", StringComparison.OrdinalIgnoreCase) ||
+            path.StartsWith("/openapi", StringComparison.OrdinalIgnoreCase))
         {
             await next(context);
             return;
