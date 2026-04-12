@@ -1,12 +1,12 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
+using Pixario.Ingest.Application.Exceptions;
 using Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 using Pixario.Ingest.Application.Messages;
 using Pixario.Ingest.Application.Ports.Repositories;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Configuration;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Connection;
-using Pixario.Ingest.Worker.Exceptions;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
