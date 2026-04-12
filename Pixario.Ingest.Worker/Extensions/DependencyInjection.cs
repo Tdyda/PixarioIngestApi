@@ -7,7 +7,10 @@ using Pixario.Ingest.Infrastructure.Integrations.ComfyUi.Clients;
 using Pixario.Ingest.Infrastructure.Integrations.ComfyUi.Configuration;
 using Pixario.Ingest.Infrastructure.Integrations.ComfyUi.Http;
 using Pixario.Ingest.Infrastructure.Integrations.ComfyUi.Workflows;
-using Pixario.Ingest.Infrastructure.Integrations.Outbound;
+using Pixario.Ingest.Infrastructure.Integrations.Outbound.Builders;
+using Pixario.Ingest.Infrastructure.Integrations.Outbound.Clients;
+using Pixario.Ingest.Infrastructure.Integrations.Outbound.Configuration;
+using Pixario.Ingest.Infrastructure.Integrations.Outbound.Http;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Configuration;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Connection;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Publishing;
@@ -26,10 +29,11 @@ public static class DependencyInjection
         services.AddScoped<IJobRepository, JobRepository>();
         services.AddScoped<ProcessBatchHandler>();
         services.AddScoped<CheckImageStatusHandler>();
+        services.AddScoped<BatchProcessedHandler>();
 
         services.Configure<RabbitMqOptions>(configuration.GetSection("RabbitMq"));
         services.Configure<ComfyUiConfig>(configuration.GetSection("ComfyUi"));
-        services.Configure<CallbackOptions>(configuration.GetSection("Callbacks"));
+        services.Configure<PixarioOptions>(configuration.GetSection("Callbacks"));
         services.Configure<FileStorageOptions>(configuration.GetSection("FileStorage"));
 
         services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
@@ -45,9 +49,13 @@ public static class DependencyInjection
         services.AddSingleton<IComfyUiCheckImageStatusGateway, ComfyUiCheckImageStatusGateway>();
         services.AddSingleton<ComfyUiPromptStatusSender>();
         services.AddSingleton<IFileStorage, FileStorage>();
+        services.AddSingleton<PixarioBatchProcessedPayloadBuilder>();
+        services.AddSingleton<IPixarioBatchProcessedGateway, PixarioBatchProcessedGateway>();
+        services.AddSingleton<PixarioBatchProcessedCallbackSender>();
 
         services.AddHostedService<ProcessBatchConsumer>();
         services.AddHostedService<CheckImageStatusConsumer>();
+        services.AddHostedService<BatchProcessedConsumer>();
 
         services.AddHttpClient("callbacks");
 
