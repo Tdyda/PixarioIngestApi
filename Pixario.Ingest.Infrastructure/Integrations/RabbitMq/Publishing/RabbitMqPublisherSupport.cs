@@ -1,15 +1,12 @@
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
-using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Configuration;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Connection;
 using RabbitMQ.Client;
 
 namespace Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Publishing;
 
 public class RabbitMqPublisherSupport(
-    IRabbitMqConnection conn,
-    IOptionsMonitor<RabbitMqOptions> opt)
+    IRabbitMqConnection conn)
 {
     public async Task PublishAsync<TMessage>(
         TMessage message,

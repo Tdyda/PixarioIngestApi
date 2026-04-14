@@ -1,7 +1,7 @@
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using Pixario.Ingest.Application.Ports.Storage;
-using Pixario.Ingest.Core.Entities;
+using Pixario.Ingest.Core.Domain;
 using Pixario.Ingest.Infrastructure.Integrations.Outbound.Configuration;
 
 namespace Pixario.Ingest.Infrastructure.Integrations.Outbound.Builders;
@@ -10,7 +10,7 @@ public class PixarioBatchProcessedPayloadBuilder(
     IFileStorage storage,
     IOptionsMonitor<PixarioOptions> opt)
 {
-    public async Task<HttpRequestMessage> BuildAsync(ImageRetouchBatch batch)
+    public async Task<HttpRequestMessage> BuildAsync(RetouchBatch batch)
     {
         var content = new MultipartFormDataContent();
 
@@ -29,7 +29,7 @@ public class PixarioBatchProcessedPayloadBuilder(
         req.Content = content;
         req.Method = HttpMethod.Post;
         req.Headers.TryAddWithoutValidation("Cookie", $"x-api-key={opt.CurrentValue.ApiKey}");
-        
+
         return req;
     }
 

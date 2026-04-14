@@ -1,25 +1,20 @@
 using Pixario.Ingest.Core.Enums;
 
-namespace Pixario.Ingest.Core.Entities;
+namespace Pixario.Ingest.Core.Domain;
 
-public class ImageRetouchJob
+public class RetouchJob
 {
-    public ImageRetouchJob()
+    private RetouchJob(Guid id, Guid batchId, Image image, JobStatus status)
     {
-    }
-
-    public ImageRetouchJob(Guid batchId, ImageAsset image)
-    {
-        Id = Guid.CreateVersion7();
+        Id = id;
         BatchId = batchId;
         Image = image;
-        Status = JobStatus.Queued;
+        Status = status;
     }
 
     public Guid Id { get; init; }
     public Guid BatchId { get; init; }
-    public ImageAsset Image { get; init; }
-    public Guid ImageId { get; init; }
+    public Image Image { get; init; }
     public JobStatus Status { get; private set; }
 
 
@@ -36,5 +31,10 @@ public class ImageRetouchJob
     public void MarkFailed()
     {
         Status = JobStatus.Failed;
+    }
+
+    public static RetouchJob Create(Guid id, Guid batchId, Image image, JobStatus status)
+    {
+        return new RetouchJob(id, batchId, image, status);
     }
 }

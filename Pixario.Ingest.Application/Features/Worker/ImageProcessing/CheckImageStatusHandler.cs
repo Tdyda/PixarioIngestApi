@@ -9,6 +9,7 @@ namespace Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 
 public class CheckImageStatusHandler(
     IJobRepository jobRepository,
+    IUnitOfWork unitOfWork,
     IProcessBatchPublisher publisher,
     IComfyUiCheckImageStatusGateway gateway,
     IFileStorage storage
@@ -16,8 +17,12 @@ public class CheckImageStatusHandler(
 {
     public async Task<bool> Handle(CheckImageStatusMessage msg, CancellationToken ct)
     {
-        msg.Job.MarkProcessing();
-        await jobRepository.UpdateAsync(msg.Job, ct);
+        var job = await jobRepository.GetAsync(msg.JobId, ct);
+        if (job is null) return false;
+
+        job.MarkProcessing();
+        await jobRepository.UpdateAsync(job, ct);
+        await unitOfWork.SaveChangesAsync(ct);
 
         var historyDoc = await gateway.ProcessAsync(msg.PromptId, ct);
         if (historyDoc is null) return false;
@@ -36,10 +41,11 @@ public class CheckImageStatusHandler(
             //throw permanent failure
             return false;
 
-        storage.RenameFile(fileName, msg.Job.Image.FileName);
+        storage.RenameFile(fileName, job.Image.FileName);
 
-        msg.Job.MarkDone();
-        await jobRepository.UpdateAsync(msg.Job, ct);
+        job.MarkDone();
+        await jobRepository.UpdateAsync(job, ct);
+        await unitOfWork.SaveChangesAsync(ct);
 
         await publisher.PublishAsync(new ProcessBatchMessage
         {

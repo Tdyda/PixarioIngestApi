@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pixario.Ingest.Infrastructure.Integrations.ComfyUi.Configuration;
 
@@ -8,13 +7,12 @@ namespace Pixario.Ingest.Infrastructure.Integrations.ComfyUi.Http;
 
 public class ComfyUiPromptSender(
     HttpClient httpClient,
-    IOptionsMonitor<ComfyUiConfig> comfyOpt,
-    ILogger<ComfyUiPromptSender> logger)
+    IOptionsMonitor<ComfyUiConfig> comfyOpt)
 {
     public async Task<string> SendAsync(object payload, CancellationToken ct)
     {
         var url = $"{comfyOpt.CurrentValue.Url}/prompt";
-        
+
         var response = await httpClient.PostAsJsonAsync(url, payload, ct);
         response.EnsureSuccessStatusCode();
 

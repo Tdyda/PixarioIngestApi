@@ -27,6 +27,7 @@ public static class DependencyInjection
     {
         services.AddScoped<IBatchRepository, BatchRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ProcessBatchHandler>();
         services.AddScoped<CheckImageStatusHandler>();
         services.AddScoped<BatchProcessedHandler>();

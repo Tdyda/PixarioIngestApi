@@ -46,7 +46,7 @@ public class BatchProcessedConsumer(
 
                 await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
             };
-            
+
             await _channel.BasicConsumeAsync(
                 opt.CurrentValue.BatchProcessedNotifyQueue,
                 false,

@@ -1,5 +1,5 @@
 using Pixario.Ingest.Application.Ports.Integrations;
-using Pixario.Ingest.Core.Entities;
+using Pixario.Ingest.Core.Domain;
 using Pixario.Ingest.Infrastructure.Integrations.Outbound.Builders;
 using Pixario.Ingest.Infrastructure.Integrations.Outbound.Http;
 
@@ -9,7 +9,7 @@ public class PixarioBatchProcessedGateway(
     PixarioBatchProcessedPayloadBuilder builder,
     PixarioBatchProcessedCallbackSender sender) : IPixarioBatchProcessedGateway
 {
-    public async Task<HttpResponseMessage> ProcessAsync(ImageRetouchBatch batch, CancellationToken ct)
+    public async Task<HttpResponseMessage> ProcessAsync(RetouchBatch batch, CancellationToken ct)
     {
         var content = await builder.BuildAsync(batch);
         return await sender.SendAsync(content, ct);

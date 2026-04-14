@@ -2,5 +2,5 @@ namespace Pixario.Ingest.Application.Messages;
 
 public class BatchProcessedMessage
 {
-    public Guid BatchId { get; set; }
+    public Guid BatchId { get; init; }
 }
