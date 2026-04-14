@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Pixario.Ingest.Core.Entities;
+using Pixario.Ingest.Infrastructure.Persistence.Models;
 
 namespace Pixario.Ingest.Infrastructure.Persistence;
 
@@ -29,10 +29,6 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
                 .WithOne()
                 .HasForeignKey(x => x.BatchId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            b.Navigation(x => x.Images)
-                .HasField("_images")
-                .UsePropertyAccessMode(PropertyAccessMode.Field);
         });
 
         modelBuilder.Entity<ImageAsset>(b =>
@@ -41,8 +37,8 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
             b.HasKey(x => x.Id);
 
             b.Property(x => x.Id).HasColumnName("id");
-            b.Property(x => x.FileName).HasColumnName("file_name");
-            b.Property(x => x.StoragePath).HasColumnName("storage_path");
+            b.Property(x => x.FileName).HasColumnName("file_name").HasMaxLength(255);
+            b.Property(x => x.StoragePath).HasColumnName("storage_path").HasMaxLength(1024);
             b.Property(x => x.Size).HasColumnName("size");
             b.Property(x => x.BatchId).HasColumnName("batch_id");
         });

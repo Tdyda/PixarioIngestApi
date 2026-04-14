@@ -1,11 +1,11 @@
-using Pixario.Ingest.Core.Entities;
+using Pixario.Ingest.Core.Domain;
 
 namespace Pixario.Ingest.Application.Ports.Repositories;
 
 public interface IBatchRepository
 {
-    Task<ImageRetouchBatch?> GetAsync(Guid id, CancellationToken ct);
-    Task<ImageRetouchBatch?> GetProcessing();
-    Task AddAsync(ImageRetouchBatch batch, CancellationToken ct);
-    Task SaveAsync(CancellationToken ct);
+    Task<RetouchBatch?> GetAsync(Guid id, CancellationToken ct);
+    Task<RetouchBatch?> GetProcessing();
+    Task AddAsync(RetouchBatch batch, CancellationToken ct);
+    Task UpdateAsync(RetouchBatch batch, CancellationToken ct);
 }

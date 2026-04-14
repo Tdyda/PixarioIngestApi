@@ -32,7 +32,8 @@ public static class DependencyInjection
         services.AddScoped<IJobRepository, JobRepository>();
         services.AddScoped<CreateJobCommandHandler>();
         services.AddScoped<IBatchRepository, BatchRepository>();
-        
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
         services.AddSingleton<IFileStorage, FileStorage>();
         services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
         services.AddSingleton<IProcessBatchPublisher, ProcessBatchPublisher>();

@@ -10,6 +10,7 @@ public class ProcessBatchHandler(
     IImageProcessingGateway gateway,
     IJobRepository jobRepository,
     IBatchRepository batchRepository,
+    IUnitOfWork unitOfWork,
     ICheckImageProcessingStatusPublisher publisher,
     IBatchProcessedNotifier notifier)
 {
@@ -23,7 +24,8 @@ public class ProcessBatchHandler(
         if (batch.Status == JobStatus.Queued)
         {
             batch.MarkProcessing();
-            await batchRepository.SaveAsync(ct);
+            await batchRepository.UpdateAsync(batch, ct);
+            await unitOfWork.SaveChangesAsync(ct);
         }
 
         var nextJob = batch.GetNextPendingJob();
@@ -31,7 +33,8 @@ public class ProcessBatchHandler(
         if (nextJob is null)
         {
             batch.MarkDone();
-            await batchRepository.SaveAsync(ct);
+            await batchRepository.UpdateAsync(batch, ct);
+            await unitOfWork.SaveChangesAsync(ct);
 
             await notifier.PublishAsync(new BatchProcessedMessage
             {
@@ -49,7 +52,7 @@ public class ProcessBatchHandler(
                 new CheckImageStatusMessage
                 {
                     BatchId = msg.BatchId,
-                    Job = nextJob,
+                    JobId = nextJob.Id,
                     PromptId = promptId,
                     CompletedAt = DateTime.UtcNow
                 }, ct);
@@ -58,6 +61,7 @@ public class ProcessBatchHandler(
         {
             nextJob.MarkFailed();
             await jobRepository.UpdateAsync(nextJob, ct);
+            await unitOfWork.SaveChangesAsync(ct);
 
             throw new Exception(
                 $"Pipeline failed, {ex.Message}",
