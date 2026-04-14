@@ -13,7 +13,7 @@ using RabbitMQ.Client.Events;
 namespace Pixario.Ingest.Worker.Messaging;
 
 public sealed class CheckImageStatusConsumer(
-    IServiceProvider sp,
+    IServiceScopeFactory scopeFactory,
     IRabbitMqConnection conn,
     IOptionsMonitor<RabbitMqOptions> opt,
     ILogger<CheckImageStatusConsumer> log)
@@ -38,7 +38,7 @@ public sealed class CheckImageStatusConsumer(
                 if (msg is null)
                     throw new PermanentProcessingException("Invalid completed message payload");
 
-                using var scope = sp.CreateScope();
+                using var scope = scopeFactory.CreateScope();
                 var handler = scope.ServiceProvider.GetRequiredService<CheckImageStatusHandler>();
                 var isSuccess = await handler.Handle(msg, ct);
 
