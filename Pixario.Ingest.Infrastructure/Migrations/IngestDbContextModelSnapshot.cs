@@ -50,8 +50,7 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                         .HasColumnName("storage_path");
 
                     b.Property<Guid>("StoredFileName")
-                        .HasMaxLength(255)
-                        .HasColumnType("char(255)")
+                        .HasColumnType("char(36)")
                         .HasColumnName("stored_file_name");
 
                     b.HasKey("Id");
@@ -107,6 +106,33 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("retouch_jobs", (string)null);
+                });
+
+            modelBuilder.Entity("Pixario.Ingest.Infrastructure.Persistence.Models.LogLevelEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("LogLevel")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("log_level");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LogLevel")
+                        .IsUnique();
+
+                    b.ToTable("log_levels", (string)null);
                 });
 
             modelBuilder.Entity("Pixario.Ingest.Infrastructure.Persistence.Models.ImageAsset", b =>

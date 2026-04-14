@@ -7,7 +7,10 @@ using Pixario.Ingest.Worker;
 using Pixario.Ingest.Worker.Extensions;
 
 var builder = Host.CreateApplicationBuilder(args);
+
 builder.Services.AddHostedService<Worker>();
+
+builder.AddPixarioLogging();
 
 var cs = builder.Configuration.GetConnectionString("IngestDb");
 builder.Services.AddDbContext<IngestDbContext>(opt => { opt.UseMySql(cs, ServerVersion.AutoDetect(cs)); });

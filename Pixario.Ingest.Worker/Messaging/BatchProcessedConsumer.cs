@@ -15,7 +15,7 @@ public class BatchProcessedConsumer(
     IRabbitMqConnection conn,
     IServiceScopeFactory scopeFactory,
     IOptionsMonitor<RabbitMqOptions> opt,
-    ILogger<BatchProcessedConsumer> logger) : BackgroundService
+    ILogger<BatchProcessedConsumer> log) : BackgroundService
 {
     private IChannel? _channel;
 
@@ -27,14 +27,17 @@ public class BatchProcessedConsumer(
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
 
-        try
+        consumer.ReceivedAsync += async (_, ea) =>
         {
-            consumer.ReceivedAsync += async (_, ea) =>
+            try
             {
                 var json = Encoding.UTF8.GetString(ea.Body.ToArray());
                 var msg = JsonSerializer.Deserialize<BatchProcessedMessage>(json);
 
-                if (msg is null) throw new PermanentProcessingException("Invalid completed message payload");
+                if (msg is null)
+                {
+                    throw new PermanentProcessingException("Invalid completed message payload");
+                }
 
                 using var scope = scopeFactory.CreateScope();
                 var handler = scope.ServiceProvider.GetRequiredService<BatchProcessedHandler>();
@@ -42,20 +45,55 @@ public class BatchProcessedConsumer(
                 var response = await handler.Handle(msg, ct);
                 var body = await response.Content.ReadAsStringAsync(ct);
 
-                logger.LogInformation("Status: {StatusCode}, body: {Body}", response.StatusCode, body);
+                log.LogDebug("Status: {StatusCode}, body: {Body}", response.StatusCode, body);
 
                 await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
-            };
+            }
+            catch (PermanentProcessingException ex)
+            {
+                log.LogError(ex, "Permanent failure -> DLQ");
+                await PublishDlqAsync(ea.Body, ct);
+                await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
+            }
+            catch (Exception ex)
+            {
+                log.LogError(ex, "Transient failure -> retry");
+                await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
+            }
+        };
 
-            await _channel.BasicConsumeAsync(
-                opt.CurrentValue.BatchProcessedNotifyQueue,
-                false,
-                consumer,
-                ct);
-        }
-        catch (Exception e)
+        await _channel.BasicConsumeAsync(
+            opt.CurrentValue.BatchProcessedNotifyQueue,
+            false,
+            consumer,
+            ct);
+    }
+
+    private async Task PublishDlqAsync(ReadOnlyMemory<byte> body, CancellationToken ct)
+    {
+        await using var ch = await conn.Connection.CreateChannelAsync(cancellationToken: ct);
+
+        var props = new BasicProperties
         {
-            throw new PermanentProcessingException(e.Message);
-        }
+            Persistent = true,
+            Headers = new Dictionary<string, object?>
+            {
+                ["dlq_reason"] = "permanent_failure"
+            }
+        };
+
+        await ch.BasicPublishAsync(
+            opt.CurrentValue.Exchange,
+            opt.CurrentValue.BatchProcessedNotifyDlqRoutingKey,
+            false,
+            props,
+            body,
+            ct);
+    }
+
+    public override void Dispose()
+    {
+        _channel?.Dispose();
+        base.Dispose();
     }
 }
