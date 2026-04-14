@@ -1,4 +1,4 @@
-namespace Pixario.Ingest.Worker.Exceptions;
+namespace Pixario.Ingest.Application.Exceptions;
 
 public sealed class PermanentProcessingException : Exception
 {
