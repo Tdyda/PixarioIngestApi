@@ -20,10 +20,10 @@ public class CreateJobCommandHandler(
 
         foreach (var file in request.Files)
         {
-            var path = await fileStorage.SaveAsync(file.Content, file.FileName, ct);
-
             var imageId = Guid.CreateVersion7();
-            var image = Image.Create(imageId, file.FileName, path, file.Size);
+            var path = await fileStorage.SaveAsync(file.Content, imageId.ToString(), ct);
+            
+            var image = Image.Create(imageId, file.FileName, imageId, path, file.Size);
 
             batch.AddImage(image);
 

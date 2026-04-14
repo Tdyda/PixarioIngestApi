@@ -41,7 +41,7 @@ public class CheckImageStatusHandler(
             //throw permanent failure
             return false;
 
-        storage.RenameFile(fileName, job.Image.FileName);
+        storage.RenameFile(fileName, job.Image.StoredFileName.ToString());
 
         job.MarkDone();
         await jobRepository.UpdateAsync(job, ct);

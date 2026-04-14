@@ -18,11 +18,11 @@ public class PixarioBatchProcessedPayloadBuilder(
 
         foreach (var image in batch.Images)
         {
-            var stream = await storage.LoadFile(image.FileName);
+            var stream = await storage.LoadFile(image.StoredFileName.ToString());
             var streamContent = new StreamContent(stream);
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue(GetContentType(image.FileName));
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue(GetContentType(image.StoredFileName.ToString()));
 
-            content.Add(streamContent, "files[]", image.FileName);
+            content.Add(streamContent, "files[]", image.OriginalFileName);
         }
 
         var req = new HttpRequestMessage();

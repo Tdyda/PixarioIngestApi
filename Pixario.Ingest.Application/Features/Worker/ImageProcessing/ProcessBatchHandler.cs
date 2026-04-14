@@ -46,7 +46,7 @@ public class ProcessBatchHandler(
 
         try
         {
-            var promptId = await gateway.ProcessAsync(nextJob.Image.FileName, ct);
+            var promptId = await gateway.ProcessAsync(nextJob.Image.StoredFileName.ToString(), ct);
 
             await publisher.PublishAsync(
                 new CheckImageStatusMessage

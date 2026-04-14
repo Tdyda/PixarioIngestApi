@@ -7,16 +7,18 @@ public class ImageAsset
     {
     }
 
-    public ImageAsset(Guid id, string fileName, string storagePath, long size)
+    public ImageAsset(Guid id, string originalFileName, Guid storedFileName, string storagePath, long size)
     {
         Id = id;
-        FileName = fileName;
+        OriginalFileName = originalFileName;
+        StoredFileName = storedFileName;
         StoragePath = storagePath;
         Size = size;
     }
 
     public Guid Id { get; init; }
-    public string FileName { get; init; } = null!;
+    public string OriginalFileName { get; init; } = null!;
+    public Guid StoredFileName { get; } = Guid.Empty;
     public string StoragePath { get; init; } = null!;
     public long Size { get; init; }
     public Guid BatchId { get; init; }

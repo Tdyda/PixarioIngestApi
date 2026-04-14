@@ -37,7 +37,8 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
             b.HasKey(x => x.Id);
 
             b.Property(x => x.Id).HasColumnName("id");
-            b.Property(x => x.FileName).HasColumnName("file_name").HasMaxLength(255);
+            b.Property(x => x.OriginalFileName).HasColumnName("original_file_name").HasMaxLength(255);
+            b.Property(x => x.StoredFileName).HasColumnName("stored_file_name").HasMaxLength(255);
             b.Property(x => x.StoragePath).HasColumnName("storage_path").HasMaxLength(1024);
             b.Property(x => x.Size).HasColumnName("size");
             b.Property(x => x.BatchId).HasColumnName("batch_id");
