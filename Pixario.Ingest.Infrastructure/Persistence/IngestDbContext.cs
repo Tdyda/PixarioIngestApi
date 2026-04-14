@@ -8,6 +8,8 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
     public DbSet<ImageRetouchBatch> ImageRetouchBatches => Set<ImageRetouchBatch>();
     public DbSet<ImageAsset> ImageAssets => Set<ImageAsset>();
     public DbSet<ImageRetouchJob> ImageRetouchJobs => Set<ImageRetouchJob>();
+    
+    public DbSet<LogLevelEntity> LogLevels => Set<LogLevelEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,7 +40,7 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
 
             b.Property(x => x.Id).HasColumnName("id");
             b.Property(x => x.OriginalFileName).HasColumnName("original_file_name").HasMaxLength(255);
-            b.Property(x => x.StoredFileName).HasColumnName("stored_file_name").HasMaxLength(255);
+            b.Property(x => x.StoredFileName).HasColumnName("stored_file_name");
             b.Property(x => x.StoragePath).HasColumnName("storage_path").HasMaxLength(1024);
             b.Property(x => x.Size).HasColumnName("size");
             b.Property(x => x.BatchId).HasColumnName("batch_id");
@@ -55,6 +57,19 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
             b.HasOne(x => x.Image)
                 .WithOne()
                 .HasForeignKey<ImageRetouchJob>(x => x.ImageId);
+        });
+
+        modelBuilder.Entity<LogLevelEntity>(b =>
+        {
+            b.ToTable("log_levels");
+            
+            b.HasKey(x => x.Id);
+            b.Property(l => l.Id).HasColumnName("id");
+
+            b.HasIndex(l => l.LogLevel).IsUnique();
+            b.Property(l => l.LogLevel).HasColumnName("log_level").HasConversion<string>().HasMaxLength(20);
+
+            b.Property(l => l.IsActive).HasColumnName("is_active");
         });
     }
 }

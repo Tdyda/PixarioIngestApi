@@ -32,3 +32,6 @@ Thumbs.db
 scripts
 .github
 notes
+
+Pixario.Ingest.Api/logs
+Pixario.Ingest.Worker/logs

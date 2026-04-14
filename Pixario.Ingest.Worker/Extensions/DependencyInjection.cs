@@ -1,5 +1,8 @@
+using Pixario.Ingest.Application.Features.Logging.Get;
+using Pixario.Ingest.Application.Features.Logging.Update;
 using Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 using Pixario.Ingest.Application.Ports.Integrations;
+using Pixario.Ingest.Application.Ports.Logging;
 using Pixario.Ingest.Application.Ports.Messaging;
 using Pixario.Ingest.Application.Ports.Repositories;
 using Pixario.Ingest.Application.Ports.Storage;
@@ -18,6 +21,7 @@ using Pixario.Ingest.Infrastructure.Integrations.Storage;
 using Pixario.Ingest.Infrastructure.Integrations.Storage.Configuration;
 using Pixario.Ingest.Infrastructure.Persistence.Repositories;
 using Pixario.Ingest.Worker.Messaging;
+using Serilog.Core;
 
 namespace Pixario.Ingest.Worker.Extensions;
 
@@ -28,9 +32,12 @@ public static class DependencyInjection
         services.AddScoped<IBatchRepository, BatchRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ILogLevelRepository, LogLevelRepository>();
         services.AddScoped<ProcessBatchHandler>();
         services.AddScoped<CheckImageStatusHandler>();
         services.AddScoped<BatchProcessedHandler>();
+        services.AddScoped<GetLogLevelHandler>();
+        services.AddScoped<UpdateLogLevelHandler>();
 
         services.Configure<RabbitMqOptions>(configuration.GetSection("RabbitMq"));
         services.Configure<ComfyUiConfig>(configuration.GetSection("ComfyUi"));
@@ -53,6 +60,7 @@ public static class DependencyInjection
         services.AddSingleton<PixarioBatchProcessedPayloadBuilder>();
         services.AddSingleton<IPixarioBatchProcessedGateway, PixarioBatchProcessedGateway>();
         services.AddSingleton<PixarioBatchProcessedCallbackSender>();
+        services.AddSingleton<LogLevelService>();
 
         services.AddHostedService<ProcessBatchConsumer>();
         services.AddHostedService<CheckImageStatusConsumer>();

@@ -12,8 +12,8 @@ using Pixario.Ingest.Infrastructure.Persistence;
 namespace Pixario.Ingest.Infrastructure.Migrations
 {
     [DbContext(typeof(IngestDbContext))]
-    [Migration("20260401225923_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20260414201043_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace Pixario.Ingest.Infrastructure.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageAsset", b =>
+            modelBuilder.Entity("Pixario.Ingest.Infrastructure.Persistence.Models.ImageAsset", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -36,10 +36,11 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                         .HasColumnType("char(36)")
                         .HasColumnName("batch_id");
 
-                    b.Property<string>("FileName")
+                    b.Property<string>("OriginalFileName")
                         .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("file_name");
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("original_file_name");
 
                     b.Property<long>("Size")
                         .HasColumnType("bigint")
@@ -47,8 +48,13 @@ namespace Pixario.Ingest.Infrastructure.Migrations
 
                     b.Property<string>("StoragePath")
                         .IsRequired()
-                        .HasColumnType("longtext")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar(1024)")
                         .HasColumnName("storage_path");
+
+                    b.Property<Guid>("StoredFileName")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("stored_file_name");
 
                     b.HasKey("Id");
 
@@ -57,7 +63,7 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                     b.ToTable("image_assets", (string)null);
                 });
 
-            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageRetouchBatch", b =>
+            modelBuilder.Entity("Pixario.Ingest.Infrastructure.Persistence.Models.ImageRetouchBatch", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -78,7 +84,7 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                     b.ToTable("retouch_batch", (string)null);
                 });
 
-            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageRetouchJob", b =>
+            modelBuilder.Entity("Pixario.Ingest.Infrastructure.Persistence.Models.ImageRetouchJob", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -91,8 +97,9 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                     b.Property<Guid>("ImageId")
                         .HasColumnType("char(36)");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
@@ -104,33 +111,60 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                     b.ToTable("retouch_jobs", (string)null);
                 });
 
-            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageAsset", b =>
+            modelBuilder.Entity("Pixario.Ingest.Infrastructure.Persistence.Models.LogLevelEntity", b =>
                 {
-                    b.HasOne("Pixario.Ingest.Core.Entities.ImageRetouchBatch", null)
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit(1)")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("LogLevel")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("log_level");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LogLevel")
+                        .IsUnique();
+
+                    b.ToTable("log_levels", (string)null);
+                });
+
+            modelBuilder.Entity("Pixario.Ingest.Infrastructure.Persistence.Models.ImageAsset", b =>
+                {
+                    b.HasOne("Pixario.Ingest.Infrastructure.Persistence.Models.ImageRetouchBatch", null)
                         .WithMany("Images")
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageRetouchJob", b =>
+            modelBuilder.Entity("Pixario.Ingest.Infrastructure.Persistence.Models.ImageRetouchJob", b =>
                 {
-                    b.HasOne("Pixario.Ingest.Core.Entities.ImageRetouchBatch", null)
+                    b.HasOne("Pixario.Ingest.Infrastructure.Persistence.Models.ImageRetouchBatch", null)
                         .WithMany("Jobs")
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Pixario.Ingest.Core.Entities.ImageAsset", "Image")
+                    b.HasOne("Pixario.Ingest.Infrastructure.Persistence.Models.ImageAsset", "Image")
                         .WithOne()
-                        .HasForeignKey("Pixario.Ingest.Core.Entities.ImageRetouchJob", "ImageId")
+                        .HasForeignKey("Pixario.Ingest.Infrastructure.Persistence.Models.ImageRetouchJob", "ImageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Image");
                 });
 
-            modelBuilder.Entity("Pixario.Ingest.Core.Entities.ImageRetouchBatch", b =>
+            modelBuilder.Entity("Pixario.Ingest.Infrastructure.Persistence.Models.ImageRetouchBatch", b =>
                 {
                     b.Navigation("Images");
 

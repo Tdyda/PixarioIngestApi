@@ -1,9 +1,9 @@
 using Pixario.Ingest.Application.Features.Logging.Get;
 using Pixario.Ingest.Core.Enums;
 
-namespace Pixario.Ingest.Worker;
+namespace Pixario.Ingest.Api.HostedServices;
 
-public class Worker(
+public class LogLevelWatcher(
     LogLevelService svc,
     IServiceScopeFactory scopeFactory) : BackgroundService
 {

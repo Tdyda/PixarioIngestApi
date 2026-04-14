@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
+using Pixario.Ingest.Api.HostedServices;
 using Pixario.Ingest.Api.OpenApi;
 using Pixario.Ingest.Api.Security;
 using Pixario.Ingest.Application.Features.Api.Jobs.CreateBatch;
+using Pixario.Ingest.Application.Features.Logging.Get;
+using Pixario.Ingest.Application.Ports.Logging;
 using Pixario.Ingest.Application.Ports.Messaging;
 using Pixario.Ingest.Application.Ports.Repositories;
 using Pixario.Ingest.Application.Ports.Storage;
@@ -33,12 +36,17 @@ public static class DependencyInjection
         services.AddScoped<CreateJobCommandHandler>();
         services.AddScoped<IBatchRepository, BatchRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ILogLevelRepository, LogLevelRepository>();
+        services.AddScoped<GetLogLevelHandler>();
 
         services.AddSingleton<IFileStorage, FileStorage>();
         services.AddSingleton<IRabbitMqConnection, RabbitMqConnection>();
         services.AddSingleton<IProcessBatchPublisher, ProcessBatchPublisher>();
+        services.AddSingleton<LogLevelService>();
 
         services.AddTransient<ApiKeyMiddleware>();
+        
+        services.AddHostedService<LogLevelWatcher>();
 
         return services;
     }
