@@ -55,6 +55,7 @@ public class ProcessBatchHandler(
         try
         {
             var promptId = await gateway.ProcessAsync(nextJob.Image.StoredFileName.ToString(), ct);
+            log.LogDebug("PromptId {promptId}", promptId);
 
             log.LogDebug("Publishing CheckImageStatusMessage for job {jobId} to RabbitMQ", nextJob.Id);
             await publisher.PublishAsync(
