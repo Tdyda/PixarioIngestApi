@@ -45,7 +45,8 @@ public sealed class ProcessBatchConsumer(
                 var currentBatch = await batchRepository.GetProcessing();
                 if (currentBatch is not null && currentBatch.Id != msg.BatchId)
                 {
-                    log.LogDebug("Batch {currentBatchId} still in progress, redirect {BatchId} to retry...", currentBatch.Id, msg.BatchId);
+                    log.LogDebug("Batch {currentBatchId} still in progress, redirect {BatchId} to retry...",
+                        currentBatch.Id, msg.BatchId);
                     await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
 
                     return;

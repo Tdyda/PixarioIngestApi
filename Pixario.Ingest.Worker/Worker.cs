@@ -15,11 +15,8 @@ public class Worker(
             var handler = scope.ServiceProvider.GetRequiredService<GetLogLevelHandler>();
             var level = await handler.Handle(ct);
 
-            if (level is null)
-            {
-                return;
-            }
-            
+            if (level is null) return;
+
             switch (level.Level)
             {
                 case LogLevelValue.Debug:
@@ -38,7 +35,7 @@ public class Worker(
                     svc.SetInfo();
                     break;
             }
-           
+
             await Task.Delay(5000, ct);
         }
     }

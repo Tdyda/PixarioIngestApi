@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -44,7 +43,8 @@ public sealed class CheckImageStatusConsumer(
 
                 if (!isSuccess)
                 {
-                    log.LogDebug("Job {jobID} is still processing. Scheduling next status check in 10 seconds.", msg.JobId);
+                    log.LogDebug("Job {jobID} is still processing. Scheduling next status check in 10 seconds.",
+                        msg.JobId);
                     await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
                     return;
                 }

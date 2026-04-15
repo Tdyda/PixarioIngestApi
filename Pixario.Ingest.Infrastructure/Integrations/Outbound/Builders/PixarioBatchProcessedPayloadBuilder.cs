@@ -18,17 +18,16 @@ public class PixarioBatchProcessedPayloadBuilder(
         content.Add(new StringContent(batch.Id.ToString()), "batchId");
 
         foreach (var job in batch.Jobs)
-        {
             if (job.Status == JobStatus.Done)
             {
                 var stream = await storage.LoadFile(job.Image.StoredFileName.ToString());
                 var streamContent = new StreamContent(stream);
-                streamContent.Headers.ContentType = new MediaTypeHeaderValue(GetContentType(job.Image.StoredFileName.ToString()));
+                streamContent.Headers.ContentType =
+                    new MediaTypeHeaderValue(GetContentType(job.Image.StoredFileName.ToString()));
 
                 content.Add(streamContent, "files[]", job.Image.OriginalFileName);
             }
-        }
-        
+
         var req = new HttpRequestMessage();
         req.Content = content;
         req.Method = HttpMethod.Post;

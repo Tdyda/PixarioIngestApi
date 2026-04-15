@@ -12,7 +12,7 @@ public static class LoggingExtensions
 
         var appLevelSwitch = new LoggingLevelSwitch();
         builder.Services.AddSingleton(appLevelSwitch);
-        
+
         Log.Logger = new LoggerConfiguration()
             .Enrich.FromLogContext()
             .MinimumLevel.ControlledBy(appLevelSwitch)
@@ -23,7 +23,7 @@ public static class LoggingExtensions
                     e.Properties.TryGetValue("SourceContext", out var sc) &&
                     sc.ToString().Contains("Pixario.Ingest"))
                 .WriteTo.File(
-                    path: "logs/app-files-.txt",
+                    "logs/app-files-.txt",
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 30))
             .WriteTo.Logger(lc => lc
@@ -34,15 +34,15 @@ public static class LoggingExtensions
                         sc.ToString().Contains("System")
                     ))
                 .WriteTo.File(
-                    path: "logs/server-.txt",
+                    "logs/server-.txt",
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 14))
             .WriteTo.Console()
             .CreateLogger();
 
         builder.Logging.ClearProviders();
-        builder.Logging.AddSerilog(Log.Logger, dispose: true);
-        
+        builder.Logging.AddSerilog(Log.Logger, true);
+
         return builder;
     }
 }

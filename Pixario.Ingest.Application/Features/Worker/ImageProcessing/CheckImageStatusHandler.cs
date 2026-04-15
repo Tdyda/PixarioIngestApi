@@ -45,10 +45,7 @@ public class CheckImageStatusHandler(
             .GetSection("images__0__filename")
             ?.GetString();
 
-        if (fileName is null)
-        {
-            throw new PermanentProcessingException("Output not found");
-        }
+        if (fileName is null) throw new PermanentProcessingException("Output not found");
 
         storage.RenameFile(fileName, job.Image.StoredFileName.ToString());
 

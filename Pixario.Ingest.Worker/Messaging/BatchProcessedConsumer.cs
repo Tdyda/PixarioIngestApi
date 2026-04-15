@@ -34,10 +34,7 @@ public class BatchProcessedConsumer(
                 var json = Encoding.UTF8.GetString(ea.Body.ToArray());
                 var msg = JsonSerializer.Deserialize<BatchProcessedMessage>(json);
 
-                if (msg is null)
-                {
-                    throw new PermanentProcessingException("Invalid completed message payload");
-                }
+                if (msg is null) throw new PermanentProcessingException("Invalid completed message payload");
 
                 using var scope = scopeFactory.CreateScope();
                 var handler = scope.ServiceProvider.GetRequiredService<BatchProcessedHandler>();

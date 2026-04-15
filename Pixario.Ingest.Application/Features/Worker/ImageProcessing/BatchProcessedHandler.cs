@@ -17,10 +17,7 @@ public class BatchProcessedHandler(
     public async Task<HttpResponseMessage> Handle(BatchProcessedMessage msg, CancellationToken ct)
     {
         var batch = await batchRepository.GetAsync(msg.BatchId, ct);
-        if (batch is null)
-        {
-            throw new PermanentProcessingException("Batch not found");
-        }
+        if (batch is null) throw new PermanentProcessingException("Batch not found");
 
         try
         {
@@ -31,7 +28,7 @@ public class BatchProcessedHandler(
             log.LogError(ex, "Sending to external service failed for batch {batchId}", msg.BatchId);
             throw new PermanentProcessingException(ex.ToString());
         }
-        catch(ExternalServiceUnavailableException ex)
+        catch (ExternalServiceUnavailableException ex)
         {
             log.LogError(ex, "Sending to external service failed for batch {batchId}", msg.BatchId);
             throw;

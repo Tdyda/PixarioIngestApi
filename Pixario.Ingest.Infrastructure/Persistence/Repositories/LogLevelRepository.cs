@@ -6,7 +6,7 @@ namespace Pixario.Ingest.Infrastructure.Persistence.Repositories;
 
 public class LogLevelRepository(
     IngestDbContext context
-    ) : ILogLevelRepository
+) : ILogLevelRepository
 {
     public async Task<LogLevel?> GetAsync(CancellationToken ct)
     {
@@ -24,15 +24,9 @@ public class LogLevelRepository(
         var nextLevel = await context.LogLevels
             .SingleOrDefaultAsync(l => l.LogLevel == level.Level, ct);
 
-        if (nextLevel is null)
-        {
-            throw new InvalidOperationException($"Log level '{level.Level}' does not exist.");
-        }
+        if (nextLevel is null) throw new InvalidOperationException($"Log level '{level.Level}' does not exist.");
 
-        if (currentLevel is not null && currentLevel.Id != nextLevel.Id)
-        {
-            currentLevel.IsActive = false;
-        }
+        if (currentLevel is not null && currentLevel.Id != nextLevel.Id) currentLevel.IsActive = false;
 
         nextLevel.IsActive = true;
     }

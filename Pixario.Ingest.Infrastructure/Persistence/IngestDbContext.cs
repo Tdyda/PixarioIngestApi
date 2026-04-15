@@ -8,7 +8,7 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
     public DbSet<ImageRetouchBatch> ImageRetouchBatches => Set<ImageRetouchBatch>();
     public DbSet<ImageAsset> ImageAssets => Set<ImageAsset>();
     public DbSet<ImageRetouchJob> ImageRetouchJobs => Set<ImageRetouchJob>();
-    
+
     public DbSet<LogLevelEntity> LogLevels => Set<LogLevelEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,7 +62,7 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
         modelBuilder.Entity<LogLevelEntity>(b =>
         {
             b.ToTable("log_levels");
-            
+
             b.HasKey(x => x.Id);
             b.Property(l => l.Id).HasColumnName("id");
 

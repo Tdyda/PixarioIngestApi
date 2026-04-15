@@ -21,7 +21,6 @@ using Pixario.Ingest.Infrastructure.Integrations.Storage;
 using Pixario.Ingest.Infrastructure.Integrations.Storage.Configuration;
 using Pixario.Ingest.Infrastructure.Persistence.Repositories;
 using Pixario.Ingest.Worker.Messaging;
-using Serilog.Core;
 
 namespace Pixario.Ingest.Worker.Extensions;
 

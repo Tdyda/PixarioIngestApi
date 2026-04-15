@@ -5,6 +5,8 @@ namespace Pixario.Ingest.Application.Features.Logging.Get;
 
 public class GetLogLevelHandler(ILogLevelRepository repository)
 {
-    public async Task<LogLevel?> Handle(CancellationToken ct) =>
-        await repository.GetAsync(ct);
+    public async Task<LogLevel?> Handle(CancellationToken ct)
+    {
+        return await repository.GetAsync(ct);
+    }
 }

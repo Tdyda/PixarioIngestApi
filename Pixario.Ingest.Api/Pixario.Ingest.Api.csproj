@@ -13,16 +13,11 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Scalar.AspNetCore" Version="2.13.15"/>
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-        <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-nblumhardt-02322" />
+        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-nblumhardt-02322"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Pixario.Ingest.Infrastructure\Pixario.Ingest.Infrastructure.csproj"/>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="logs\" />
-    </ItemGroup>
-
 </Project>

@@ -45,7 +45,7 @@ public static class DependencyInjection
         services.AddSingleton<LogLevelService>();
 
         services.AddTransient<ApiKeyMiddleware>();
-        
+
         services.AddHostedService<LogLevelWatcher>();
 
         return services;

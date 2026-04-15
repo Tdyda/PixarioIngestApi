@@ -14,7 +14,7 @@ public class PixarioBatchProcessedCallbackSender(
         request.RequestUri = new Uri($"{opt.CurrentValue.BaseUrl}/{opt.CurrentValue.EndpointPath}");
 
         var response = await httpClient.SendAsync(request, ct);
-        
+
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             var body404 = await response.Content.ReadAsStringAsync(ct);
@@ -31,7 +31,7 @@ public class PixarioBatchProcessedCallbackSender(
         }
 
         response.EnsureSuccessStatusCode();
-        
+
         return response;
     }
 }

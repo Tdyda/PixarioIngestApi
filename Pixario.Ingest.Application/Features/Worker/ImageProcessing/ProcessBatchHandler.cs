@@ -48,7 +48,7 @@ public class ProcessBatchHandler(
                 BatchId = msg.BatchId
             }, ct);
             log.LogInformation("BatchProcessedMessage for batch {batchId} published to RabbitMQ", msg.BatchId);
-            
+
             return;
         }
 
@@ -73,7 +73,7 @@ public class ProcessBatchHandler(
             log.LogError(ex, "Processing failed for job {jobId}", nextJob.Id);
             throw new PermanentProcessingException(ex.ToString());
         }
-        catch(ExternalServiceUnavailableException ex)
+        catch (ExternalServiceUnavailableException ex)
         {
             log.LogError(ex, "Processing failed for job {jobId}. Service unavailable", nextJob.Id);
         }

@@ -12,6 +12,7 @@ public static class ImageAssetMappings
 
     public static ImageAsset Map(this Image domain)
     {
-        return new ImageAsset(domain.Id, domain.OriginalFileName, domain.StoredFileName, domain.StoragePath, domain.Size);
+        return new ImageAsset(domain.Id, domain.OriginalFileName, domain.StoredFileName, domain.StoragePath,
+            domain.Size);
     }
 }
