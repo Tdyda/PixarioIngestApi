@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using Pixario.Ingest.Application.Ports.Storage;
 using Pixario.Ingest.Core.Domain;
+using Pixario.Ingest.Core.Enums;
 using Pixario.Ingest.Infrastructure.Integrations.Outbound.Configuration;
 
 namespace Pixario.Ingest.Infrastructure.Integrations.Outbound.Builders;
@@ -16,15 +17,18 @@ public class PixarioBatchProcessedPayloadBuilder(
 
         content.Add(new StringContent(batch.Id.ToString()), "batchId");
 
-        foreach (var image in batch.Images)
+        foreach (var job in batch.Jobs)
         {
-            var stream = await storage.LoadFile(image.StoredFileName.ToString());
-            var streamContent = new StreamContent(stream);
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue(GetContentType(image.StoredFileName.ToString()));
+            if (job.Status == JobStatus.Done)
+            {
+                var stream = await storage.LoadFile(job.Image.StoredFileName.ToString());
+                var streamContent = new StreamContent(stream);
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue(GetContentType(job.Image.StoredFileName.ToString()));
 
-            content.Add(streamContent, "files[]", image.OriginalFileName);
+                content.Add(streamContent, "files[]", job.Image.OriginalFileName);
+            }
         }
-
+        
         var req = new HttpRequestMessage();
         req.Content = content;
         req.Method = HttpMethod.Post;
