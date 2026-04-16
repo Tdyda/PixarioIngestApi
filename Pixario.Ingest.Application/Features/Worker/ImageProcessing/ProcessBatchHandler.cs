@@ -52,28 +52,18 @@ public class ProcessBatchHandler(
             return;
         }
 
-        try
-        {
-            var promptId = await gateway.ProcessAsync(nextJob.Image.StoredFileName.ToString(), ct);
-            log.LogDebug("PromptId {promptId}", promptId);
+        var promptId = await gateway.ProcessAsync(nextJob.Image.StoredFileName.ToString(), ct);
+        log.LogDebug("PromptId {promptId}", promptId);
 
-            log.LogDebug("Publishing CheckImageStatusMessage for job {jobId} to RabbitMQ", nextJob.Id);
-            await publisher.PublishAsync(
-                new CheckImageStatusMessage
-                {
-                    BatchId = msg.BatchId,
-                    JobId = nextJob.Id,
-                    PromptId = promptId,
-                    CompletedAt = DateTime.UtcNow
-                }, ct);
-            log.LogInformation("CheckImageStatusMessage for job {jobId} published to RabbitMQ", nextJob.Id);
-        }
-        catch (Exception)
-        {
-            nextJob.MarkFailed();
-            await jobRepository.UpdateAsync(nextJob, ct);
-            await unitOfWork.SaveChangesAsync(ct);
-            throw;
-        }
+        log.LogDebug("Publishing CheckImageStatusMessage for job {jobId} to RabbitMQ", nextJob.Id);
+        await publisher.PublishAsync(
+            new CheckImageStatusMessage
+            {
+                BatchId = msg.BatchId,
+                JobId = nextJob.Id,
+                PromptId = promptId,
+                CompletedAt = DateTime.UtcNow
+            }, ct);
+        log.LogInformation("CheckImageStatusMessage for job {jobId} published to RabbitMQ", nextJob.Id);
     }
 }

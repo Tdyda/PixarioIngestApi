@@ -26,7 +26,6 @@ public class BatchRepository(IngestDbContext db) : IBatchRepository
             .AsSplitQuery()
             .Include(b => b.Jobs)
             .ThenInclude(j => j.Image)
-            .Include(b => b.Jobs)
             .FirstOrDefaultAsync(b => b.Status == JobStatus.Processing);
 
         return model?.Map();
