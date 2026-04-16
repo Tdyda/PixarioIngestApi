@@ -8,11 +8,12 @@ public class ImageRetouchJob
     {
     }
 
-    public ImageRetouchJob(Guid id, Guid batchId, Guid imageId, JobStatus status)
+    public ImageRetouchJob(Guid id, Guid batchId, ImageAsset image, JobStatus status)
     {
         Id = id;
         BatchId = batchId;
-        ImageId = imageId;
+        Image = image;
+        ImageId = image.Id;
         Status = status;
     }
 
