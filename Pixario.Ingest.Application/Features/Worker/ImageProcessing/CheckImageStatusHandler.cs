@@ -23,7 +23,11 @@ public class CheckImageStatusHandler(
     public async Task<bool> Handle(CheckImageStatusMessage msg, CancellationToken ct)
     {
         var job = await jobRepository.GetAsync(msg.JobId, ct);
-        if (job is null) return false;
+        if (job is null)
+        {
+            await PublishNextMessage(msg.BatchId, ct);
+            throw new PermanentProcessingException($"Job {msg.JobId} not found");
+        }
 
         if (job.Status != JobStatus.Processing)
         {
@@ -52,12 +56,7 @@ public class CheckImageStatusHandler(
             job.JobFailedReason = ex.Message;
             await jobRepository.UpdateAsync(job, ct);
             await unitOfWork.SaveChangesAsync(ct);
-            log.LogDebug("Publishing ProcessBatchMessage for batch {batchId} to RabbitMQ", msg.BatchId);
-            await publisher.PublishAsync(new ProcessBatchMessage
-            {
-                BatchId = msg.BatchId
-            }, ct);
-            log.LogInformation("ProcessBatchMessage for batch {batchId} published to RabbitMQ", msg.BatchId);
+            await PublishNextMessage(msg.BatchId, ct);
             throw new PermanentProcessingException(ex.Message);
         }
 
@@ -77,13 +76,18 @@ public class CheckImageStatusHandler(
         await unitOfWork.SaveChangesAsync(ct);
         log.LogInformation("Processing ended for job {jobId}", msg.JobId);
 
-        log.LogDebug("Publishing ProcessBatchMessage for batch {batchId} to RabbitMQ", msg.BatchId);
-        await publisher.PublishAsync(new ProcessBatchMessage
-        {
-            BatchId = msg.BatchId
-        }, ct);
-        log.LogInformation("ProcessBatchMessage for batch {batchId} published to RabbitMQ", msg.BatchId);
+        await PublishNextMessage(msg.BatchId, ct);
 
         return true;
+    }
+
+    private async Task PublishNextMessage(Guid batchId, CancellationToken ct)
+    {
+        log.LogDebug("Publishing ProcessBatchMessage for batch {batchId} to RabbitMQ", batchId);
+        await publisher.PublishAsync(new ProcessBatchMessage
+        {
+            BatchId = batchId
+        }, ct);
+        log.LogInformation("ProcessBatchMessage for batch {batchId} published to RabbitMQ", batchId);
     }
 }
