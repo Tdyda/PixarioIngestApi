@@ -7,6 +7,12 @@ public class GetLogLevelHandler(ILogLevelRepository repository)
 {
     public async Task<LogLevel?> Handle(CancellationToken ct)
     {
-        return await repository.GetAsync(ct);
+        try
+        {
+            return await repository.GetAsync(ct);
+        }catch(Exception ex)
+        {
+            throw new Exception("Database error", ex);
+        }
     }
 }

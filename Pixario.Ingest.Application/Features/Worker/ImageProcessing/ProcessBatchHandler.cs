@@ -68,21 +68,12 @@ public class ProcessBatchHandler(
                 }, ct);
             log.LogInformation("CheckImageStatusMessage for job {jobId} published to RabbitMQ", nextJob.Id);
         }
-        catch (InvalidOperationException ex)
-        {
-            log.LogError(ex, "Processing failed for job {jobId}", nextJob.Id);
-            throw new PermanentProcessingException(ex.ToString());
-        }
-        catch (ExternalServiceUnavailableException ex)
-        {
-            log.LogError(ex, "Processing failed for job {jobId}. Service unavailable", nextJob.Id);
-        }
-        catch (Exception ex)
+        catch (Exception)
         {
             nextJob.MarkFailed();
             await jobRepository.UpdateAsync(nextJob, ct);
             await unitOfWork.SaveChangesAsync(ct);
-            log.LogError(ex, "Processing failed for job {jobId}", nextJob.Id);
+            throw;
         }
     }
 }

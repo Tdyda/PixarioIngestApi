@@ -58,6 +58,12 @@ public sealed class CheckImageStatusConsumer(
                 await PublishDlqAsync(ea.Body, ct);
                 await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
             }
+            catch (TemporaryProcessingException ex)
+            {
+                log.LogError(ex, "Transient failure (notifier) -> retry");
+
+                await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
+            }
             catch (Exception ex)
             {
                 log.LogError(ex, "Transient failure (notifier) -> retry");
