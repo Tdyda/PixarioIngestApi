@@ -29,7 +29,6 @@ public class CreateJobCommandHandler(
 
             var image = Image.Create(imageId, file.FileName, imageId, path, file.Size);
 
-            batch.AddImage(image);
             var job = RetouchJob.Create(Guid.CreateVersion7(), batchId, image, JobStatus.Queued);
             log.LogInformation("Created job: {jobId}", job.Id);
             batch.AddJob(job);

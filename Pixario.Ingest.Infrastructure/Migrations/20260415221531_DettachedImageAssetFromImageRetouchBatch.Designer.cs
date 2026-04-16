@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Pixario.Ingest.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using Pixario.Ingest.Infrastructure.Persistence;
 namespace Pixario.Ingest.Infrastructure.Migrations
 {
     [DbContext(typeof(IngestDbContext))]
-    partial class IngestDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260415221531_DettachedImageAssetFromImageRetouchBatch")]
+    partial class DettachedImageAssetFromImageRetouchBatch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -79,21 +82,18 @@ namespace Pixario.Ingest.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)")
-                        .HasColumnName("id");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("BatchId")
                         .HasColumnType("char(36)")
                         .HasColumnName("batch_id");
 
                     b.Property<Guid>("ImageId")
-                        .HasColumnType("char(36)")
-                        .HasColumnName("image_id");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasColumnName("status");
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 

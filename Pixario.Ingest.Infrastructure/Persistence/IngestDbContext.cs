@@ -22,11 +22,6 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
             b.Property(x => x.Status).HasColumnName("status").HasConversion<string>();
             b.Property(x => x.CreatedAt).HasColumnName("created_at");
 
-            b.HasMany(x => x.Images)
-                .WithOne()
-                .HasForeignKey(x => x.BatchId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             b.HasMany(x => x.Jobs)
                 .WithOne()
                 .HasForeignKey(x => x.BatchId)
@@ -43,20 +38,22 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
             b.Property(x => x.StoredFileName).HasColumnName("stored_file_name");
             b.Property(x => x.StoragePath).HasColumnName("storage_path").HasMaxLength(1024);
             b.Property(x => x.Size).HasColumnName("size");
-            b.Property(x => x.BatchId).HasColumnName("batch_id");
         });
 
         modelBuilder.Entity<ImageRetouchJob>(b =>
         {
             b.ToTable("retouch_jobs");
+            b.HasKey(x => x.Id);
 
+            b.Property(x => x.Id).HasColumnName("id");
             b.Property(x => x.BatchId).HasColumnName("batch_id");
-
-            b.Property(e => e.Status).HasConversion<string>();
+            b.Property(x => x.ImageId).HasColumnName("image_id");
+            b.Property(x => x.Status).HasColumnName("status").HasConversion<string>();
 
             b.HasOne(x => x.Image)
                 .WithOne()
-                .HasForeignKey<ImageRetouchJob>(x => x.ImageId);
+                .HasForeignKey<ImageRetouchJob>(x => x.ImageId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<LogLevelEntity>(b =>
