@@ -11,11 +11,9 @@ public class BatchRepository(IngestDbContext db) : IBatchRepository
     public async Task<RetouchBatch?> GetAsync(Guid id, CancellationToken ct)
     {
         var model = await db.ImageRetouchBatches.Where(b => b.Id == id)
-            .AsSplitQuery()
             .AsNoTracking()
             .Include(b => b.Jobs)
             .ThenInclude(j => j.Image)
-            .Include(b => b.Images)
             .FirstOrDefaultAsync(ct);
 
         return model?.Map();

@@ -21,5 +21,4 @@ public class ImageAsset
     public Guid StoredFileName { get; } = Guid.Empty;
     public string StoragePath { get; init; } = null!;
     public long Size { get; init; }
-    public Guid BatchId { get; init; }
 }
