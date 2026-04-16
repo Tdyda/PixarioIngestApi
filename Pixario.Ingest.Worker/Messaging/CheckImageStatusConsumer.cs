@@ -66,9 +66,10 @@ public sealed class CheckImageStatusConsumer(
             }
             catch (Exception ex)
             {
-                log.LogError(ex, "Transient failure (notifier) -> retry");
+                log.LogError(ex, "Permanent failure (notifier) -> DLQ");
 
-                await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
+                await PublishDlqAsync(ea.Body, ct);
+                await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
             }
         };
 

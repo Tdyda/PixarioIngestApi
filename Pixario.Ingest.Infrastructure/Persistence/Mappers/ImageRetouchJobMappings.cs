@@ -7,7 +7,7 @@ public static class ImageRetouchJobMappings
 {
     public static ImageRetouchJob Map(this RetouchJob job)
     {
-        return new ImageRetouchJob(job.Id, job.BatchId, job.Image.Map(), job.Status);
+        return new ImageRetouchJob(job.Id, job.BatchId, job.Image.Map(), job.Status, job.JobFailedReason);
     }
 
     public static RetouchJob Map(this ImageRetouchJob job)

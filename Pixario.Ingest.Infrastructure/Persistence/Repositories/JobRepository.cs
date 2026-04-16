@@ -29,6 +29,7 @@ public class JobRepository(IngestDbContext db) : IJobRepository
             .FirstAsync(x => x.Id == job.Id, ct);
 
         entity.Status = job.Status;
+        entity.JobFailedReason = job.JobFailedReason;
     }
 
     public async Task<IReadOnlyList<RetouchJob>> GetProcessedAsync(Guid batchId, CancellationToken ct)

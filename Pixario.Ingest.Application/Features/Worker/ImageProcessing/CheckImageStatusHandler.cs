@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Pixario.Ingest.Application.Exceptions;
 using Pixario.Ingest.Application.Extensions;
@@ -39,13 +40,35 @@ public class CheckImageStatusHandler(
 
         var outputs = root.GetSection($"{msg.PromptId}__outputs");
 
-        var firstOutput = outputs?.EnumerateObject().First().Value;
+        JsonElement? firstOutput;
+
+        try
+        {
+            firstOutput = outputs?.EnumerateObject().First().Value;
+        }
+        catch (InvalidOperationException ex)
+        {
+            job.MarkFailed();
+            job.JobFailedReason = ex.Message;
+            await jobRepository.UpdateAsync(job, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+            log.LogDebug("Publishing ProcessBatchMessage for batch {batchId} to RabbitMQ", msg.BatchId);
+            await publisher.PublishAsync(new ProcessBatchMessage
+            {
+                BatchId = msg.BatchId
+            }, ct);
+            log.LogInformation("ProcessBatchMessage for batch {batchId} published to RabbitMQ", msg.BatchId);
+            throw new PermanentProcessingException(ex.Message);
+        }
 
         var fileName = firstOutput?
             .GetSection("images__0__filename")
             ?.GetString();
 
-        if (fileName is null) throw new PermanentProcessingException("Output not found");
+        if (fileName is null)
+        {
+            return false;
+        }
 
         storage.RenameFile(fileName, job.Image.StoredFileName.ToString());
 

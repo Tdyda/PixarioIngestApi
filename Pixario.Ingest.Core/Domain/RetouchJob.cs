@@ -16,6 +16,7 @@ public class RetouchJob
     public Guid BatchId { get; init; }
     public Image Image { get; init; }
     public JobStatus Status { get; private set; }
+    public string? JobFailedReason { get; set; }
 
 
     public void MarkProcessing()

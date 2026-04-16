@@ -49,6 +49,7 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
             b.Property(x => x.BatchId).HasColumnName("batch_id");
             b.Property(x => x.ImageId).HasColumnName("image_id");
             b.Property(x => x.Status).HasColumnName("status").HasConversion<string>();
+            b.Property(x => x.JobFailedReason).HasColumnName("job_failed_reason").HasMaxLength(50);
 
             b.HasOne(x => x.Image)
                 .WithOne()
