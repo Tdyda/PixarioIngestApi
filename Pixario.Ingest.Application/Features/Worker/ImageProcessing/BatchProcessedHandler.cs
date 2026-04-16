@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using Pixario.Ingest.Application.Exceptions;
-using Pixario.Ingest.Application.Extensions;
 using Pixario.Ingest.Application.Messages;
 using Pixario.Ingest.Application.Ports.Integrations;
 using Pixario.Ingest.Application.Ports.Repositories;
@@ -23,23 +22,12 @@ public class BatchProcessedHandler(
         {
             return await gateway.ProcessAsync(batch, ct);
         }
-        catch (InvalidOperationException ex)
-        {
-            log.LogError(ex, "Sending to external service failed for batch {batchId}", msg.BatchId);
-            throw new PermanentProcessingException(ex.ToString());
-        }
-        catch (ExternalServiceUnavailableException ex)
-        {
-            log.LogError(ex, "Sending to external service failed for batch {batchId}", msg.BatchId);
-            throw;
-        }
-        catch (Exception ex)
+        catch (Exception)
         {
             batch.MarkFailed();
             await batchRepository.UpdateAsync(batch, ct);
             await unitOfWork.SaveChangesAsync(ct);
-            log.LogError(ex, "Processing failed for batch {batchId}", msg.BatchId);
-            throw new PermanentProcessingException(ex.ToString());
+            throw;
         }
     }
 }

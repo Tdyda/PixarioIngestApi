@@ -64,6 +64,11 @@ public sealed class ProcessBatchConsumer(
                 await PublishDlqAsync(ea.Body, ct);
                 await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
             }
+            catch (TemporaryProcessingException ex)
+            {
+                log.LogError(ex, "Transient failure -> DLQ");
+                await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
+            }
             catch (Exception ex)
             {
                 log.LogError(ex, "Transient failure -> retry");
