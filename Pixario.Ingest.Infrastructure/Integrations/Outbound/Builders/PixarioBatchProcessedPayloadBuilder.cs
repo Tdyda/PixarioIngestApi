@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Pixario.Ingest.Application.Ports.Storage;
 using Pixario.Ingest.Core.Domain;
 using Pixario.Ingest.Core.Enums;
+using Pixario.Ingest.Infrastructure.Exceptions;
 using Pixario.Ingest.Infrastructure.Integrations.Outbound.Configuration;
 
 namespace Pixario.Ingest.Infrastructure.Integrations.Outbound.Builders;
@@ -17,6 +18,11 @@ public class PixarioBatchProcessedPayloadBuilder(
 
         content.Add(new StringContent(batch.Id.ToString()), "batchId");
 
+        if(batch.Jobs.All(j => j.Status != JobStatus.Done))
+        {
+            throw new ExternalServiceBadRequestException("No files to upload.");
+        }
+        
         foreach (var job in batch.Jobs)
             if (job.Status == JobStatus.Done)
             {
