@@ -1,7 +1,5 @@
-using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Pixario.Ingest.Application.Exceptions;
-using Pixario.Ingest.Application.Extensions;
 using Pixario.Ingest.Application.Messages;
 using Pixario.Ingest.Application.Ports.Integrations;
 using Pixario.Ingest.Application.Ports.Messaging;
@@ -17,7 +15,8 @@ public class CheckImageStatusHandler(
     IProcessBatchPublisher publisher,
     IComfyUiCheckImageStatusGateway gateway,
     IFileStorage storage,
-    ILogger<CheckImageStatusHandler> log
+    ILogger<CheckImageStatusHandler> log,
+    CheckImageStatusErrorMapper errorMapper
 )
 {
     public async Task<bool> Handle(CheckImageStatusMessage msg, CancellationToken ct)
@@ -37,48 +36,30 @@ public class CheckImageStatusHandler(
             log.LogInformation("Processing started for job {jobId}", msg.JobId);
         }
 
-        var historyDoc = await gateway.ProcessAsync(msg.PromptId, ct);
-        if (historyDoc is null) return false;
+        var response = await gateway.ProcessAsync(msg.PromptId, ct);
+        if (response is null) return false;
 
-        var root = historyDoc!.RootElement;
-
-        var outputs = root.GetSection($"{msg.PromptId}__outputs");
-
-        JsonElement? firstOutput;
-
-        try
+        if (response.Status == "success")
         {
-            firstOutput = outputs?.EnumerateObject().First().Value;
-        }
-        catch (InvalidOperationException ex)
-        {
-            job.MarkFailed();
-            job.JobFailedReason = ex.Message;
+            storage.RenameFile(response.FileName!, job.Image.StoredFileName.ToString());
+
+            job.MarkDone();
             await jobRepository.UpdateAsync(job, ct);
             await unitOfWork.SaveChangesAsync(ct);
+            log.LogInformation("Processing ended for job {jobId}", msg.JobId);
+
             await PublishNextMessage(msg.BatchId, ct);
-            throw new PermanentProcessingException(ex.Message);
+
+            return true;
         }
 
-        var fileName = firstOutput?
-            .GetSection("images__0__filename")
-            ?.GetString();
-
-        if (fileName is null)
-        {
-            return false;
-        }
-
-        storage.RenameFile(fileName, job.Image.StoredFileName.ToString());
-
-        job.MarkDone();
+        job.MarkFailed();
+        errorMapper.Map(response);
+        job.JobFailedReason = response.ExceptionMessage!;
         await jobRepository.UpdateAsync(job, ct);
         await unitOfWork.SaveChangesAsync(ct);
-        log.LogInformation("Processing ended for job {jobId}", msg.JobId);
-
         await PublishNextMessage(msg.BatchId, ct);
-
-        return true;
+        throw new PermanentProcessingException(response.ExceptionMessage!);
     }
 
     private async Task PublishNextMessage(Guid batchId, CancellationToken ct)

@@ -57,6 +57,7 @@ public static class DependencyInjection
         services.AddSingleton<ComfyUiPromptStatusSender>();
         services.AddSingleton<IFileStorage, FileStorage>();
         services.AddSingleton<PixarioBatchProcessedPayloadBuilder>();
+        services.AddSingleton<CheckImageResponseBuilder>();
         services.AddSingleton<IPixarioBatchProcessedGateway, PixarioBatchProcessedGateway>();
         services.AddSingleton<PixarioBatchProcessedCallbackSender>();
         services.AddSingleton<LogLevelService>();

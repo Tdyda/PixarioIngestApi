@@ -9,8 +9,7 @@ namespace Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 public class BatchProcessedHandler(
     IBatchRepository batchRepository,
     IUnitOfWork unitOfWork,
-    IPixarioBatchProcessedGateway gateway,
-    ILogger<BatchProcessedHandler> log
+    IPixarioBatchProcessedGateway gateway
 )
 {
     public async Task<HttpResponseMessage> Handle(BatchProcessedMessage msg, CancellationToken ct)
