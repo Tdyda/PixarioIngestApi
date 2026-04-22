@@ -1,8 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Pixario.Ingest.Infrastructure.Integrations.Outbound.Http.ResponseDto;
 
-namespace Pixario.Ingest.Application.Features.Worker.ImageProcessing;
+namespace Pixario.Ingest.Infrastructure.Integrations.Outbound.Http.ResponseDto;
 
 public class MessageDtoConverter : JsonConverter<MessageDto>
 {

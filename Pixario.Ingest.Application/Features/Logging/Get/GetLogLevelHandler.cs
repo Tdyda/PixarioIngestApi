@@ -10,7 +10,8 @@ public class GetLogLevelHandler(ILogLevelRepository repository)
         try
         {
             return await repository.GetAsync(ct);
-        }catch(Exception ex)
+        }
+        catch (Exception ex)
         {
             throw new Exception("Database error", ex);
         }

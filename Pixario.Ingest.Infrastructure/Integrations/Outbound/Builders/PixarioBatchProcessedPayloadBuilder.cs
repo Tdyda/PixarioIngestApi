@@ -18,11 +18,9 @@ public class PixarioBatchProcessedPayloadBuilder(
 
         content.Add(new StringContent(batch.Id.ToString()), "batchId");
 
-        if(batch.Jobs.All(j => j.Status != JobStatus.Done))
-        {
+        if (batch.Jobs.All(j => j.Status != JobStatus.Done))
             throw new ExternalServiceBadRequestException("No files to upload.");
-        }
-        
+
         foreach (var job in batch.Jobs)
             if (job.Status == JobStatus.Done)
             {

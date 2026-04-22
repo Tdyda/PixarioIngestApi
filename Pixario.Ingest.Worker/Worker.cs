@@ -43,7 +43,7 @@ public class Worker(
             {
                 logger.LogError(ex, "Database error");
             }
-            
+
             await Task.Delay(5000, ct);
         }
     }

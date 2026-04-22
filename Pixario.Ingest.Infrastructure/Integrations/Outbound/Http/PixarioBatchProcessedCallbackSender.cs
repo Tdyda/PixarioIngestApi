@@ -1,6 +1,5 @@
 using System.Net;
 using Microsoft.Extensions.Options;
-using Pixario.Ingest.Application.Extensions;
 using Pixario.Ingest.Infrastructure.Exceptions;
 using Pixario.Ingest.Infrastructure.Integrations.Outbound.Configuration;
 

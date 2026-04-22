@@ -1,5 +1,3 @@
-using System.Text.Json;
-using Pixario.Ingest.Application.Extensions;
 using Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 using Pixario.Ingest.Application.Ports.Integrations;
 using Pixario.Ingest.Infrastructure.Integrations.ComfyUi.Http;

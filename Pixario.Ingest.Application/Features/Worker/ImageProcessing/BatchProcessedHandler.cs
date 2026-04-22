@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using Pixario.Ingest.Application.Exceptions;
 using Pixario.Ingest.Application.Messages;
 using Pixario.Ingest.Application.Ports.Integrations;

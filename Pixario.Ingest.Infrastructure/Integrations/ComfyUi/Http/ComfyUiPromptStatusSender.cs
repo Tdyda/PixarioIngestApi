@@ -14,7 +14,7 @@ public class ComfyUiPromptStatusSender(
     public async Task<JsonDocument?> SendAsync(string promptId, CancellationToken ct)
     {
         var response = await httpClient.GetAsync($"{comfyOpt.CurrentValue.Url}/history/{promptId}", ct);
-        
+
         switch (response.StatusCode)
         {
             case HttpStatusCode.NotFound:
@@ -33,7 +33,7 @@ public class ComfyUiPromptStatusSender(
                 throw new ExternalServiceUnavailableException(body);
             }
         }
-        
+
         response.EnsureSuccessStatusCode();
         var json = await response.Content.ReadAsStringAsync(ct);
         var historyDoc = JsonDocument.Parse(json);

@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using Pixario.Ingest.Application.Extensions;
 using Pixario.Ingest.Infrastructure.Exceptions;
 using Pixario.Ingest.Infrastructure.Integrations.ComfyUi.Configuration;
 

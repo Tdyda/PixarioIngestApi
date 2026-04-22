@@ -2,6 +2,7 @@ using System.Text.Json;
 using Pixario.Ingest.Application.Exceptions;
 using Pixario.Ingest.Application.Extensions;
 using Pixario.Ingest.Application.Features.Worker.ImageProcessing;
+using Pixario.Ingest.Infrastructure.Integrations.Outbound.Http.ResponseDto;
 
 namespace Pixario.Ingest.Infrastructure.Integrations.Outbound.Builders;
 
