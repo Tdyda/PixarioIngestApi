@@ -61,6 +61,7 @@ public static class DependencyInjection
         services.AddSingleton<IPixarioBatchProcessedGateway, PixarioBatchProcessedGateway>();
         services.AddSingleton<PixarioBatchProcessedCallbackSender>();
         services.AddSingleton<LogLevelService>();
+        services.AddSingleton<CheckImageStatusErrorMapper>();
 
         services.AddHostedService<ProcessBatchConsumer>();
         services.AddHostedService<CheckImageStatusConsumer>();
