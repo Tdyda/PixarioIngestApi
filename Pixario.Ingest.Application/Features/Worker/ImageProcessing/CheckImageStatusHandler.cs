@@ -52,8 +52,7 @@ public class CheckImageStatusHandler(
 
             return true;
         }
-
-        job.MarkFailed();
+        
         errorMapper.Map(response);
         job.JobFailedReason = response.ExceptionMessage!;
         await jobRepository.UpdateAsync(job, ct);
