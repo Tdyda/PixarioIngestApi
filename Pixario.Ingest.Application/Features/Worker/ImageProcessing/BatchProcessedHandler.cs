@@ -20,9 +20,9 @@ public class BatchProcessedHandler(
         {
             return await gateway.ProcessAsync(batch, ct);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            batch.MarkFailed();
+            batch.BatchFailedReason = ex.Message;
             await batchRepository.UpdateAsync(batch, ct);
             await unitOfWork.SaveChangesAsync(ct);
             throw;

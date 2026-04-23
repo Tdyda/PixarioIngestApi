@@ -40,7 +40,8 @@ public class BatchRepository(IngestDbContext db) : IBatchRepository
     {
         var entity = await db.ImageRetouchBatches
             .FirstAsync(x => x.Id == batch.Id, ct);
-
+        
         entity.Status = batch.Status;
+        entity.BatchFailedReason = batch.BatchFailedReason;
     }
 }
