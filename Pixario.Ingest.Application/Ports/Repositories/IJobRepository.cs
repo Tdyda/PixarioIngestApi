@@ -1,11 +1,11 @@
-using Pixario.Ingest.Core.Entities;
+using Pixario.Ingest.Core.Domain;
 
 namespace Pixario.Ingest.Application.Ports.Repositories;
 
 public interface IJobRepository
 {
-    Task SaveAsync(ImageRetouchJob job, CancellationToken ct);
-    Task<ImageRetouchJob?> GetAsync(Guid jobId, CancellationToken ct);
-    Task UpdateAsync(ImageRetouchJob job, CancellationToken ct);
-    Task<IReadOnlyList<ImageRetouchJob>> GetProcessedAsync(Guid batchId, CancellationToken ct);
+    Task SaveAsync(RetouchJob job, CancellationToken ct);
+    Task<RetouchJob?> GetAsync(Guid jobId, CancellationToken ct);
+    Task UpdateAsync(RetouchJob job, CancellationToken ct);
+    Task<IReadOnlyList<RetouchJob>> GetProcessedAsync(Guid batchId, CancellationToken ct);
 }

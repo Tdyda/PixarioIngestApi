@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+using Pixario.Ingest.Application.Exceptions;
 using Pixario.Ingest.Application.Messages;
 using Pixario.Ingest.Application.Ports.Integrations;
 using Pixario.Ingest.Application.Ports.Messaging;
@@ -10,20 +12,24 @@ public class ProcessBatchHandler(
     IImageProcessingGateway gateway,
     IJobRepository jobRepository,
     IBatchRepository batchRepository,
+    IUnitOfWork unitOfWork,
     ICheckImageProcessingStatusPublisher publisher,
-    IBatchProcessedNotifier notifier)
+    IBatchProcessedNotifier notifier,
+    ILogger<ProcessBatchHandler> log)
 {
     public async Task Handle(ProcessBatchMessage msg, CancellationToken ct)
     {
         var batch = await batchRepository.GetAsync(msg.BatchId, ct);
 
         if (batch is null)
-            throw new InvalidOperationException($"Batch {msg.BatchId} not found");
+            throw new PermanentProcessingException($"Batch {msg.BatchId} not found");
 
         if (batch.Status == JobStatus.Queued)
         {
             batch.MarkProcessing();
-            await batchRepository.SaveAsync(ct);
+            await batchRepository.UpdateAsync(batch, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+            log.LogInformation("Processing started for batch {batchId}", msg.BatchId);
         }
 
         var nextJob = batch.GetNextPendingJob();
@@ -31,37 +37,32 @@ public class ProcessBatchHandler(
         if (nextJob is null)
         {
             batch.MarkDone();
-            await batchRepository.SaveAsync(ct);
+            await batchRepository.UpdateAsync(batch, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+            log.LogInformation("Processing ended for batch {batchId}", msg.BatchId);
 
+            log.LogDebug("Publishing BatchProcessedMessage for batch {batchId} to RabbitMQ", msg.BatchId);
             await notifier.PublishAsync(new BatchProcessedMessage
             {
                 BatchId = msg.BatchId
             }, ct);
+            log.LogInformation("BatchProcessedMessage for batch {batchId} published to RabbitMQ", msg.BatchId);
 
             return;
         }
 
-        try
-        {
-            var promptId = await gateway.ProcessAsync(nextJob.Image.FileName, ct);
+        var promptId = await gateway.ProcessAsync(nextJob.Image.StoredFileName.ToString(), ct);
+        log.LogDebug("PromptId {promptId}", promptId);
 
-            await publisher.PublishAsync(
-                new CheckImageStatusMessage
-                {
-                    BatchId = msg.BatchId,
-                    Job = nextJob,
-                    PromptId = promptId,
-                    CompletedAt = DateTime.UtcNow
-                }, ct);
-        }
-        catch (Exception ex)
-        {
-            nextJob.MarkFailed();
-            await jobRepository.UpdateAsync(nextJob, ct);
-
-            throw new Exception(
-                $"Pipeline failed, {ex.Message}",
-                ex);
-        }
+        log.LogDebug("Publishing CheckImageStatusMessage for job {jobId} to RabbitMQ", nextJob.Id);
+        await publisher.PublishAsync(
+            new CheckImageStatusMessage
+            {
+                BatchId = msg.BatchId,
+                JobId = nextJob.Id,
+                PromptId = promptId,
+                CompletedAt = DateTime.UtcNow
+            }, ct);
+        log.LogInformation("CheckImageStatusMessage for job {jobId} published to RabbitMQ", nextJob.Id);
     }
 }

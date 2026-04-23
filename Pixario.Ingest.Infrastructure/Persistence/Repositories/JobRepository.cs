@@ -1,35 +1,42 @@
 using Microsoft.EntityFrameworkCore;
 using Pixario.Ingest.Application.Ports.Repositories;
-using Pixario.Ingest.Core.Entities;
+using Pixario.Ingest.Core.Domain;
 using Pixario.Ingest.Core.Enums;
+using Pixario.Ingest.Infrastructure.Persistence.Mappers;
 
 namespace Pixario.Ingest.Infrastructure.Persistence.Repositories;
 
 public class JobRepository(IngestDbContext db) : IJobRepository
 {
-    public async Task SaveAsync(ImageRetouchJob job, CancellationToken ct)
+    public async Task SaveAsync(RetouchJob job, CancellationToken ct)
     {
-        db.ImageRetouchJobs.Add(job);
-        await db.SaveChangesAsync(ct);
+        await db.ImageRetouchJobs.AddAsync(job.Map(), ct);
     }
 
-    public async Task<ImageRetouchJob?> GetAsync(Guid jobId, CancellationToken ct)
+    public async Task<RetouchJob?> GetAsync(Guid jobId, CancellationToken ct)
     {
-        return await db.ImageRetouchJobs
+        var model = await db.ImageRetouchJobs
+            .AsNoTracking()
             .Include(x => x.Image)
             .FirstOrDefaultAsync(x => x.Id == jobId, ct);
+
+        return model?.Map();
     }
 
-    public async Task UpdateAsync(ImageRetouchJob job, CancellationToken ct)
+    public async Task UpdateAsync(RetouchJob job, CancellationToken ct)
     {
-        db.ImageRetouchJobs.Update(job);
-        await db.SaveChangesAsync(ct);
+        var entity = await db.ImageRetouchJobs
+            .FirstAsync(x => x.Id == job.Id, ct);
+
+        entity.Status = job.Status;
+        entity.JobFailedReason = job.JobFailedReason;
     }
 
-    public async Task<IReadOnlyList<ImageRetouchJob>> GetProcessedAsync(Guid batchId, CancellationToken ct)
+    public async Task<IReadOnlyList<RetouchJob>> GetProcessedAsync(Guid batchId, CancellationToken ct)
     {
         return await db.ImageRetouchJobs
             .Where(x => x.BatchId == batchId && x.Status == JobStatus.Processing)
+            .Select(j => j.Map())
             .ToListAsync(ct);
     }
 }

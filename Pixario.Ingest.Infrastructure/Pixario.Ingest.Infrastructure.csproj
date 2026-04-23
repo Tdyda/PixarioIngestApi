@@ -2,6 +2,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Pixario.Ingest.Application\Pixario.Ingest.Application.csproj"/>
+        <ProjectReference Include="..\Pixario.Ingest.Core\Pixario.Ingest.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

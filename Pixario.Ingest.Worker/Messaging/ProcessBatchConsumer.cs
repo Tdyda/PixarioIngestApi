@@ -21,11 +21,11 @@ public sealed class ProcessBatchConsumer(
 {
     private IChannel? _channel;
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        _channel = await conn.Connection.CreateChannelAsync(cancellationToken: stoppingToken);
+        _channel = await conn.Connection.CreateChannelAsync(cancellationToken: ct);
 
-        await _channel.BasicQosAsync(0, 1, false, stoppingToken);
+        await _channel.BasicQosAsync(0, 1, false, ct);
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
 
@@ -45,28 +45,34 @@ public sealed class ProcessBatchConsumer(
                 var currentBatch = await batchRepository.GetProcessing();
                 if (currentBatch is not null && currentBatch.Id != msg.BatchId)
                 {
-                    log.LogWarning($"Batch {currentBatch.Id} still in progress, redirect {msg.BatchId} to retry...");
-                    await _channel.BasicNackAsync(ea.DeliveryTag, false, false, stoppingToken);
+                    log.LogDebug("Batch {currentBatchId} still in progress, redirect {BatchId} to retry...",
+                        currentBatch.Id, msg.BatchId);
+                    await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
 
                     return;
                 }
 
                 var handler = scope.ServiceProvider.GetRequiredService<ProcessBatchHandler>();
 
-                await handler.Handle(msg, stoppingToken);
+                await handler.Handle(msg, ct);
 
-                await _channel.BasicAckAsync(ea.DeliveryTag, false, stoppingToken);
+                await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
             }
             catch (PermanentProcessingException ex)
             {
                 log.LogError(ex, "Permanent failure -> DLQ");
-                await PublishDlqAsync(ea.Body, stoppingToken);
-                await _channel.BasicAckAsync(ea.DeliveryTag, false, stoppingToken);
+                await PublishDlqAsync(ea.Body, ct);
+                await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
+            }
+            catch (TemporaryProcessingException ex)
+            {
+                log.LogError(ex, "Transient failure -> DLQ");
+                await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
             }
             catch (Exception ex)
             {
                 log.LogError(ex, "Transient failure -> retry");
-                await _channel.BasicNackAsync(ea.DeliveryTag, false, false, stoppingToken);
+                await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
             }
         };
 
@@ -74,7 +80,7 @@ public sealed class ProcessBatchConsumer(
             opt.CurrentValue.BatchProcessQueue,
             false,
             consumer,
-            stoppingToken);
+            ct);
     }
 
     private async Task PublishDlqAsync(ReadOnlyMemory<byte> body, CancellationToken ct)

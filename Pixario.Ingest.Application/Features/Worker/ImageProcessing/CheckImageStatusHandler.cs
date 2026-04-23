@@ -1,51 +1,74 @@
-using Pixario.Ingest.Application.Extensions;
+using Microsoft.Extensions.Logging;
+using Pixario.Ingest.Application.Exceptions;
 using Pixario.Ingest.Application.Messages;
 using Pixario.Ingest.Application.Ports.Integrations;
 using Pixario.Ingest.Application.Ports.Messaging;
 using Pixario.Ingest.Application.Ports.Repositories;
 using Pixario.Ingest.Application.Ports.Storage;
+using Pixario.Ingest.Core.Enums;
 
 namespace Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 
 public class CheckImageStatusHandler(
     IJobRepository jobRepository,
+    IUnitOfWork unitOfWork,
     IProcessBatchPublisher publisher,
     IComfyUiCheckImageStatusGateway gateway,
-    IFileStorage storage
+    IFileStorage storage,
+    ILogger<CheckImageStatusHandler> log,
+    CheckImageStatusErrorMapper errorMapper
 )
 {
     public async Task<bool> Handle(CheckImageStatusMessage msg, CancellationToken ct)
     {
-        msg.Job.MarkProcessing();
-        await jobRepository.UpdateAsync(msg.Job, ct);
+        var job = await jobRepository.GetAsync(msg.JobId, ct);
+        if (job is null)
+        {
+            await PublishNextMessage(msg.BatchId, ct);
+            throw new PermanentProcessingException($"Job {msg.JobId} not found");
+        }
 
-        var historyDoc = await gateway.ProcessAsync(msg.PromptId, ct);
-        if (historyDoc is null) return false;
+        if (job.Status != JobStatus.Processing)
+        {
+            job.MarkProcessing();
+            await jobRepository.UpdateAsync(job, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+            log.LogInformation("Processing started for job {jobId}", msg.JobId);
+        }
 
-        var root = historyDoc!.RootElement;
+        var response = await gateway.ProcessAsync(msg.PromptId, ct);
+        if (response is null) return false;
 
-        var outputs = root.GetSection($"{msg.PromptId}__outputs");
+        if (response.Status == "success")
+        {
+            storage.RenameFile(response.FileName!, job.Image.StoredFileName.ToString());
 
-        var firstOutput = outputs?.EnumerateObject().First().Value;
+            job.MarkDone();
+            await jobRepository.UpdateAsync(job, ct);
+            await unitOfWork.SaveChangesAsync(ct);
+            log.LogInformation("Processing ended for job {jobId}", msg.JobId);
 
-        var fileName = firstOutput?
-            .GetSection("images__0__filename")
-            ?.GetString();
+            await PublishNextMessage(msg.BatchId, ct);
 
-        if (fileName is null)
-            //throw permanent failure
-            return false;
+            return true;
+        }
 
-        storage.RenameFile(fileName, msg.Job.Image.FileName);
+        job.MarkFailed();
+        errorMapper.Map(response);
+        job.JobFailedReason = response.ExceptionMessage!;
+        await jobRepository.UpdateAsync(job, ct);
+        await unitOfWork.SaveChangesAsync(ct);
+        await PublishNextMessage(msg.BatchId, ct);
+        throw new PermanentProcessingException(response.ExceptionMessage!);
+    }
 
-        msg.Job.MarkDone();
-        await jobRepository.UpdateAsync(msg.Job, ct);
-
+    private async Task PublishNextMessage(Guid batchId, CancellationToken ct)
+    {
+        log.LogDebug("Publishing ProcessBatchMessage for batch {batchId} to RabbitMQ", batchId);
         await publisher.PublishAsync(new ProcessBatchMessage
         {
-            BatchId = msg.BatchId
+            BatchId = batchId
         }, ct);
-
-        return true;
+        log.LogInformation("ProcessBatchMessage for batch {batchId} published to RabbitMQ", batchId);
     }
 }

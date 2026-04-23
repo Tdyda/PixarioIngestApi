@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Pixario.Ingest.Core.Entities;
+using Pixario.Ingest.Infrastructure.Persistence.Models;
 
 namespace Pixario.Ingest.Infrastructure.Persistence;
 
@@ -8,6 +8,8 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
     public DbSet<ImageRetouchBatch> ImageRetouchBatches => Set<ImageRetouchBatch>();
     public DbSet<ImageAsset> ImageAssets => Set<ImageAsset>();
     public DbSet<ImageRetouchJob> ImageRetouchJobs => Set<ImageRetouchJob>();
+
+    public DbSet<LogLevelEntity> LogLevels => Set<LogLevelEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,19 +22,10 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
             b.Property(x => x.Status).HasColumnName("status").HasConversion<string>();
             b.Property(x => x.CreatedAt).HasColumnName("created_at");
 
-            b.HasMany(x => x.Images)
-                .WithOne()
-                .HasForeignKey(x => x.BatchId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             b.HasMany(x => x.Jobs)
                 .WithOne()
                 .HasForeignKey(x => x.BatchId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            b.Navigation(x => x.Images)
-                .HasField("_images")
-                .UsePropertyAccessMode(PropertyAccessMode.Field);
         });
 
         modelBuilder.Entity<ImageAsset>(b =>
@@ -41,23 +34,40 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
             b.HasKey(x => x.Id);
 
             b.Property(x => x.Id).HasColumnName("id");
-            b.Property(x => x.FileName).HasColumnName("file_name");
-            b.Property(x => x.StoragePath).HasColumnName("storage_path");
+            b.Property(x => x.OriginalFileName).HasColumnName("original_file_name").HasMaxLength(255);
+            b.Property(x => x.StoredFileName).HasColumnName("stored_file_name");
+            b.Property(x => x.StoragePath).HasColumnName("storage_path").HasMaxLength(1024);
             b.Property(x => x.Size).HasColumnName("size");
-            b.Property(x => x.BatchId).HasColumnName("batch_id");
         });
 
         modelBuilder.Entity<ImageRetouchJob>(b =>
         {
             b.ToTable("retouch_jobs");
+            b.HasKey(x => x.Id);
 
+            b.Property(x => x.Id).HasColumnName("id");
             b.Property(x => x.BatchId).HasColumnName("batch_id");
-
-            b.Property(e => e.Status).HasConversion<string>();
+            b.Property(x => x.ImageId).HasColumnName("image_id");
+            b.Property(x => x.Status).HasColumnName("status").HasConversion<string>();
+            b.Property(x => x.JobFailedReason).HasColumnName("job_failed_reason").HasMaxLength(50);
 
             b.HasOne(x => x.Image)
                 .WithOne()
-                .HasForeignKey<ImageRetouchJob>(x => x.ImageId);
+                .HasForeignKey<ImageRetouchJob>(x => x.ImageId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<LogLevelEntity>(b =>
+        {
+            b.ToTable("log_levels");
+
+            b.HasKey(x => x.Id);
+            b.Property(l => l.Id).HasColumnName("id");
+
+            b.HasIndex(l => l.LogLevel).IsUnique();
+            b.Property(l => l.LogLevel).HasColumnName("log_level").HasConversion<string>().HasMaxLength(20);
+
+            b.Property(l => l.IsActive).HasColumnName("is_active");
         });
     }
 }
