@@ -37,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<BatchProcessedHandler>();
         services.AddScoped<GetLogLevelHandler>();
         services.AddScoped<UpdateLogLevelHandler>();
+        services.AddScoped<BatchProcessedDlqHandler>();
 
         services.Configure<RabbitMqOptions>(configuration.GetSection("RabbitMq"));
         services.Configure<ComfyUiConfig>(configuration.GetSection("ComfyUi"));
@@ -65,7 +66,9 @@ public static class DependencyInjection
 
         services.AddHostedService<ProcessBatchConsumer>();
         services.AddHostedService<CheckImageStatusConsumer>();
+        services.AddHostedService<CheckImageStatusDlqConsumer>();
         services.AddHostedService<BatchProcessedConsumer>();
+        services.AddHostedService<BatchProcessedDlqConsumer>();
 
         services.AddHttpClient("callbacks");
 
