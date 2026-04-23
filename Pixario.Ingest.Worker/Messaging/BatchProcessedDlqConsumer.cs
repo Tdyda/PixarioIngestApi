@@ -6,6 +6,7 @@ using Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 using Pixario.Ingest.Application.Messages;
 using Pixario.Ingest.Application.Ports.Repositories;
 using Pixario.Ingest.Core.Domain;
+using Pixario.Ingest.Infrastructure.Exceptions;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Configuration;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Connection;
 using RabbitMQ.Client;
@@ -58,6 +59,11 @@ public class BatchProcessedDlqConsumer(
                     "Status: {StatusCode}, body: {Body}",
                     response.StatusCode,
                     PrettyJson(body));
+            }
+            catch (ExternalServiceUnavailableException ex)
+            {
+                log.LogError(ex, "Transient failure (dlq) -> retry");
+                await _channel.BasicNackAsync(ea.DeliveryTag, false, false, ct);
             }
             catch (Exception ex)
             {
