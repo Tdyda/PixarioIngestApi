@@ -52,7 +52,7 @@ public class CheckImageStatusHandler(
 
             return true;
         }
-        
+
         errorMapper.Map(response);
         job.JobFailedReason = response.ExceptionMessage!;
         await jobRepository.UpdateAsync(job, ct);

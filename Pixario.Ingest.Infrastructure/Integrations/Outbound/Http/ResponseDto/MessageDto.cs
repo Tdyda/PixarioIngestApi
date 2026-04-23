@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 
 namespace Pixario.Ingest.Infrastructure.Integrations.Outbound.Http.ResponseDto;
 

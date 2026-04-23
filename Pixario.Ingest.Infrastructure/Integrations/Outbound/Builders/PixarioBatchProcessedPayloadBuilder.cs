@@ -14,7 +14,7 @@ public class PixarioBatchProcessedPayloadBuilder(
     IFileStorage storage,
     IOptionsMonitor<PixarioOptions> opt)
 {
-    private readonly MultipartFormDataContent _content = new MultipartFormDataContent();
+    private readonly MultipartFormDataContent _content = new();
 
     public Task<HttpRequestMessage> BuildAsync()
     {
@@ -34,7 +34,6 @@ public class PixarioBatchProcessedPayloadBuilder(
             throw new ExternalServiceBadRequestException("No files to upload.");
 
         foreach (var job in batch.Jobs)
-        {
             if (job.Status == JobStatus.Done)
             {
                 var stream = await storage.LoadFile(job.Image.StoredFileName.ToString());
@@ -44,7 +43,6 @@ public class PixarioBatchProcessedPayloadBuilder(
 
                 _content.Add(streamContent, "files[]", job.Image.OriginalFileName);
             }
-        }
 
         return this;
     }

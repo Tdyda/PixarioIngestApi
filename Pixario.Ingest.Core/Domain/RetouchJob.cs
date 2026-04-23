@@ -35,7 +35,8 @@ public class RetouchJob
         Status = JobStatus.Failed;
     }
 
-    public static RetouchJob Create(Guid id, Guid batchId, Image image, JobStatus status, string? jobFailedReason = null)
+    public static RetouchJob Create(Guid id, Guid batchId, Image image, JobStatus status,
+        string? jobFailedReason = null)
     {
         return new RetouchJob(id, batchId, image, status, jobFailedReason);
     }

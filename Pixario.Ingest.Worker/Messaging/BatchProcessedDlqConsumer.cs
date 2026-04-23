@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using Microsoft.VisualBasic;
 using Pixario.Ingest.Application.Exceptions;
 using Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 using Pixario.Ingest.Application.Messages;
@@ -9,7 +8,6 @@ using Pixario.Ingest.Application.Ports.Repositories;
 using Pixario.Ingest.Core.Domain;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Configuration;
 using Pixario.Ingest.Infrastructure.Integrations.RabbitMq.Connection;
-using Pixario.Ingest.Infrastructure.Persistence.Repositories;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -46,7 +44,7 @@ public class BatchProcessedDlqConsumer(
 
                 if (msg is null)
                     throw new PermanentProcessingException("Invalid completed message payload");
-                
+
                 batch = await batchRepository.GetAsync(msg.BatchId, ct);
 
                 if (batch is null)

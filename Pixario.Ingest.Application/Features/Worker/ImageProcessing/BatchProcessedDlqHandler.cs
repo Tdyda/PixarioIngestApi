@@ -14,7 +14,7 @@ public class BatchProcessedDlqHandler(
 
         if (batch is null)
             throw new Exception("Unexpected problem, batch shouldn't be null at this point.");
-        
+
         return await gateway.ProcessDlqAsync(batch, ct);
     }
 }

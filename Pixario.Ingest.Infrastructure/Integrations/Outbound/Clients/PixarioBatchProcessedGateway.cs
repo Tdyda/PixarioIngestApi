@@ -28,7 +28,7 @@ public class PixarioBatchProcessedGateway(
         var req = await builder
             .AddResultsMapAsync(batch)
             .BuildAsync();
-        
+
         return await sender.SendAsync(req, opt.CurrentValue.BaseUrl, opt.CurrentValue.FilesProcessingFailed, ct);
     }
 }

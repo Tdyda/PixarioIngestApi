@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Pixario.Ingest.Application.Exceptions;
-using Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 using Pixario.Ingest.Application.Messages;
 using Pixario.Ingest.Application.Ports.Repositories;
 using Pixario.Ingest.Core.Domain;
@@ -43,9 +42,9 @@ public class CheckImageStatusDlqConsumer(
 
                 if (msg is null)
                     throw new PermanentProcessingException("Invalid completed message payload");
-                
+
                 job = await jobRepository.GetAsync(msg.JobId, ct);
-                
+
                 if (job is null)
                     throw new PermanentProcessingException(
                         $"Job {msg.JobId} not found in DLQ consumer");
@@ -66,7 +65,7 @@ public class CheckImageStatusDlqConsumer(
                 await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
             }
         };
-        
+
         await _channel.BasicConsumeAsync(
             opt.CurrentValue.ImageStatusCheckDlqQueue,
             false,
