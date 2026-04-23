@@ -28,6 +28,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddTransient<PixarioBatchProcessedPayloadBuilder>();
+        
         services.AddScoped<IBatchRepository, BatchRepository>();
         services.AddScoped<IJobRepository, JobRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -57,7 +59,6 @@ public static class DependencyInjection
         services.AddSingleton<IComfyUiCheckImageStatusGateway, ComfyUiCheckImageStatusGateway>();
         services.AddSingleton<ComfyUiPromptStatusSender>();
         services.AddSingleton<IFileStorage, FileStorage>();
-        services.AddSingleton<PixarioBatchProcessedPayloadBuilder>();
         services.AddSingleton<CheckImageResponseBuilder>();
         services.AddSingleton<IPixarioBatchProcessedGateway, PixarioBatchProcessedGateway>();
         services.AddSingleton<PixarioBatchProcessedCallbackSender>();
