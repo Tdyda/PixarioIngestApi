@@ -5,4 +5,5 @@ namespace Pixario.Ingest.Application.Ports.Integrations;
 public interface IPixarioBatchProcessedGateway
 {
     Task<HttpResponseMessage> ProcessAsync(RetouchBatch batch, CancellationToken ct);
+    Task<HttpResponseMessage> ProcessDlqAsync(RetouchBatch batch, CancellationToken ct);
 }

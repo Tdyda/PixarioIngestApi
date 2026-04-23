@@ -1,17 +1,14 @@
 using System.Net;
-using Microsoft.Extensions.Options;
 using Pixario.Ingest.Infrastructure.Exceptions;
-using Pixario.Ingest.Infrastructure.Integrations.Outbound.Configuration;
 
 namespace Pixario.Ingest.Infrastructure.Integrations.Outbound.Http;
 
-public class PixarioBatchProcessedCallbackSender(
-    HttpClient httpClient,
-    IOptionsMonitor<PixarioOptions> opt)
+public class PixarioBatchProcessedCallbackSender(HttpClient httpClient)
 {
-    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+    public async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, string baseUrl, string endpoint,
+        CancellationToken ct)
     {
-        request.RequestUri = new Uri($"{opt.CurrentValue.BaseUrl}/{opt.CurrentValue.EndpointPath}");
+        request.RequestUri = new Uri($"{baseUrl}/{endpoint}");
 
         var response = await httpClient.SendAsync(request, ct);
 

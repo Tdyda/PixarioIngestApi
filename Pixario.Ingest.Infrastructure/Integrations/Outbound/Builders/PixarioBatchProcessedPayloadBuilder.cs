@@ -14,16 +14,25 @@ public class PixarioBatchProcessedPayloadBuilder(
     IFileStorage storage,
     IOptionsMonitor<PixarioOptions> opt)
 {
-    public async Task<HttpRequestMessage> BuildAsync(RetouchBatch batch)
-    {
-        var content = new MultipartFormDataContent();
+    private readonly MultipartFormDataContent _content = new MultipartFormDataContent();
 
-        content.Add(new StringContent(batch.Id.ToString()), "batchId");
+    public Task<HttpRequestMessage> BuildAsync()
+    {
+        var req = new HttpRequestMessage();
+        req.Content = _content;
+        req.Method = HttpMethod.Post;
+        req.Headers.TryAddWithoutValidation("Cookie", $"x-api-key={opt.CurrentValue.ApiKey}");
+
+        return Task.FromResult(req);
+    }
+
+    public async Task<PixarioBatchProcessedPayloadBuilder> AddFilesAsync(RetouchBatch batch)
+    {
+        _content.Add(new StringContent(batch.Id.ToString()), "batchId");
 
         if (batch.Jobs.All(j => j.Status != JobStatus.Done))
             throw new ExternalServiceBadRequestException("No files to upload.");
 
-        List<FileProcessResult> results = [];
         foreach (var job in batch.Jobs)
         {
             if (job.Status == JobStatus.Done)
@@ -33,28 +42,29 @@ public class PixarioBatchProcessedPayloadBuilder(
                 streamContent.Headers.ContentType =
                     new MediaTypeHeaderValue(GetContentType(job.Image.StoredFileName.ToString()));
 
-                content.Add(streamContent, "files[]", job.Image.OriginalFileName);
+                _content.Add(streamContent, "files[]", job.Image.OriginalFileName);
             }
+        }
 
-            results.Add(
+        return this;
+    }
+
+    public Task<PixarioBatchProcessedPayloadBuilder> AddResultsMapAsync(RetouchBatch batch)
+    {
+        List<FileProcessResult> results = [];
+        results.AddRange(
+            batch.Jobs.Select(job =>
                 new FileProcessResult(
                     job.Image.OriginalFileName,
                     job.Status.ToString(),
-                    job.JobFailedReason
-                )
-            );
-        }
-        
+                    job.JobFailedReason)
+            ));
+
         var jsonResult = JsonSerializer.Serialize(results);
         var resultsContent = new StringContent(jsonResult, Encoding.UTF8, "application/json");
-        content.Add(resultsContent, "results");
+        _content.Add(resultsContent, "results");
 
-        var req = new HttpRequestMessage();
-        req.Content = content;
-        req.Method = HttpMethod.Post;
-        req.Headers.TryAddWithoutValidation("Cookie", $"x-api-key={opt.CurrentValue.ApiKey}");
-
-        return req;
+        return Task.FromResult(this);
     }
 
     private static string GetContentType(string fileName)
