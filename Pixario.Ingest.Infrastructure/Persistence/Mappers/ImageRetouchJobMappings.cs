@@ -12,6 +12,6 @@ public static class ImageRetouchJobMappings
 
     public static RetouchJob Map(this ImageRetouchJob job)
     {
-        return RetouchJob.Create(job.Id, job.BatchId, job.Image.Map(), job.Status);
+        return RetouchJob.Create(job.Id, job.BatchId, job.Image.Map(), job.Status, job.JobFailedReason);
     }
 }

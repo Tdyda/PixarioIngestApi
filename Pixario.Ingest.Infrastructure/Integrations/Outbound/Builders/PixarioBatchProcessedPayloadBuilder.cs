@@ -1,4 +1,6 @@
 using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Pixario.Ingest.Application.Ports.Storage;
 using Pixario.Ingest.Core.Domain;
@@ -21,7 +23,9 @@ public class PixarioBatchProcessedPayloadBuilder(
         if (batch.Jobs.All(j => j.Status != JobStatus.Done))
             throw new ExternalServiceBadRequestException("No files to upload.");
 
+        List<FileProcessResult> results = [];
         foreach (var job in batch.Jobs)
+        {
             if (job.Status == JobStatus.Done)
             {
                 var stream = await storage.LoadFile(job.Image.StoredFileName.ToString());
@@ -31,6 +35,19 @@ public class PixarioBatchProcessedPayloadBuilder(
 
                 content.Add(streamContent, "files[]", job.Image.OriginalFileName);
             }
+
+            results.Add(
+                new FileProcessResult(
+                    job.Image.OriginalFileName,
+                    job.Status.ToString(),
+                    job.JobFailedReason
+                )
+            );
+        }
+        
+        var jsonResult = JsonSerializer.Serialize(results);
+        var resultsContent = new StringContent(jsonResult, Encoding.UTF8, "application/json");
+        content.Add(resultsContent, "results");
 
         var req = new HttpRequestMessage();
         req.Content = content;
