@@ -14,16 +14,19 @@ public sealed record RetouchBatch
     private RetouchBatch(
         Guid id,
         IReadOnlyCollection<RetouchJob> jobs,
-        JobStatus status)
+        JobStatus status,
+        string? batchFailedReason = null)
     {
         Id = id;
         Status = status;
         _jobs.AddRange(jobs);
+        BatchFailedReason = batchFailedReason;
     }
 
     public Guid Id { get; }
     public IReadOnlyCollection<RetouchJob> Jobs => _jobs;
     public JobStatus Status { get; private set; }
+    public string? BatchFailedReason { get; set; }
 
     public void AddJob(RetouchJob job)
     {
@@ -63,8 +66,9 @@ public sealed record RetouchBatch
     public static RetouchBatch Create(
         Guid id,
         IReadOnlyCollection<RetouchJob> jobs,
-        JobStatus status)
+        JobStatus status,
+        string? batchFailedReason = null)
     {
-        return new RetouchBatch(id, jobs, status);
+        return new RetouchBatch(id, jobs, status, batchFailedReason);
     }
 }

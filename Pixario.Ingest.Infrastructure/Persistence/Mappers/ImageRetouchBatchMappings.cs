@@ -11,7 +11,7 @@ public static class ImageRetouchBatchMappings
             )
             .ToList();
 
-        return new ImageRetouchBatch(domain.Id, jobs);
+        return new ImageRetouchBatch(domain.Id, jobs, domain.BatchFailedReason);
     }
 
     public static RetouchBatch Map(this ImageRetouchBatch model)
@@ -20,6 +20,6 @@ public static class ImageRetouchBatchMappings
             )
             .ToList();
 
-        return RetouchBatch.Create(model.Id, jobs, model.Status);
+        return RetouchBatch.Create(model.Id, jobs, model.Status, model.BatchFailedReason);
     }
 }
