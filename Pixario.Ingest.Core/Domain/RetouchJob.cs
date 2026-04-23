@@ -4,12 +4,13 @@ namespace Pixario.Ingest.Core.Domain;
 
 public class RetouchJob
 {
-    private RetouchJob(Guid id, Guid batchId, Image image, JobStatus status)
+    private RetouchJob(Guid id, Guid batchId, Image image, JobStatus status, string? jobFailedReason = null)
     {
         Id = id;
         BatchId = batchId;
         Image = image;
         Status = status;
+        JobFailedReason = jobFailedReason;
     }
 
     public Guid Id { get; init; }
@@ -34,8 +35,8 @@ public class RetouchJob
         Status = JobStatus.Failed;
     }
 
-    public static RetouchJob Create(Guid id, Guid batchId, Image image, JobStatus status)
+    public static RetouchJob Create(Guid id, Guid batchId, Image image, JobStatus status, string? jobFailedReason = null)
     {
-        return new RetouchJob(id, batchId, image, status);
+        return new RetouchJob(id, batchId, image, status, jobFailedReason);
     }
 }
