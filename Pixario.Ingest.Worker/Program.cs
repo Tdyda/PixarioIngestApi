@@ -15,7 +15,7 @@ builder.AddPixarioLogging();
 var cs = builder.Configuration.GetConnectionString("IngestDb");
 builder.Services.AddDbContext<IngestDbContext>(opt => { opt.UseMySql(cs, ServerVersion.AutoDetect(cs)); });
 
-builder.Services.ConfigureServices(builder.Configuration);
+builder.Services.ConfigureServices(builder.Environment, builder.Configuration);
 
 var host = builder.Build();
 
