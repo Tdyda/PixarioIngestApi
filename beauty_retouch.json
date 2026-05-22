@@ -1,0 +1,329 @@
+{
+  "106": {
+    "inputs": {
+      "filename_prefix": "output",
+      "images": [
+        "110:105",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "109": {
+    "inputs": {
+      "image": "input.jpg"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "110:90": {
+    "inputs": {
+      "model_name": "bbox/face_yolov8m.pt"
+    },
+    "class_type": "BBoxDetectorLoader(FaceParsing)",
+    "_meta": {
+      "title": "BBoxDetectorLoader(FaceParsing)"
+    }
+  },
+  "110:91": {
+    "inputs": {
+      "threshold": 0.3,
+      "dilation": 8,
+      "dilation_ratio": 0.2,
+      "by_ratio": false,
+      "bbox_detector": [
+        "110:90",
+        0
+      ],
+      "image": [
+        "109",
+        0
+      ]
+    },
+    "class_type": "BBoxDetect(FaceParsing)",
+    "_meta": {
+      "title": "BBoxDetect(FaceParsing)"
+    }
+  },
+  "110:92": {
+    "inputs": {
+      "index": 0,
+      "bbox_list": [
+        "110:91",
+        0
+      ]
+    },
+    "class_type": "BBoxListItemSelect(FaceParsing)",
+    "_meta": {
+      "title": "BBoxListItemSelect(FaceParsing)"
+    }
+  },
+  "110:93": {
+    "inputs": {
+      "bbox": [
+        "110:92",
+        0
+      ]
+    },
+    "class_type": "BBoxDecompose(FaceParsing)",
+    "_meta": {
+      "title": "BBoxDecompose(FaceParsing)"
+    }
+  },
+  "110:94": {
+    "inputs": {
+      "model": [
+        "110:96",
+        0
+      ],
+      "processor": [
+        "110:95",
+        0
+      ],
+      "image": [
+        "110:104",
+        0
+      ]
+    },
+    "class_type": "FaceParse(FaceParsing)",
+    "_meta": {
+      "title": "FaceParse(FaceParsing)"
+    }
+  },
+  "110:95": {
+    "inputs": {},
+    "class_type": "FaceParsingProcessorLoader(FaceParsing)",
+    "_meta": {
+      "title": "Load Face Parsing Processor"
+    }
+  },
+  "110:96": {
+    "inputs": {
+      "device": "cuda"
+    },
+    "class_type": "FaceParsingModelLoader(FaceParsing)",
+    "_meta": {
+      "title": "Load Face Parsing Model"
+    }
+  },
+  "110:97": {
+    "inputs": {
+      "text": "natural skin texture, realistic skin, even skin tone,\nsoft clean skin, preserved pores,\nprofessional beauty retouch, high detail, realistic portrait",
+      "clip": [
+        "110:99",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "110:98": {
+    "inputs": {
+      "samples": [
+        "110:108",
+        0
+      ],
+      "vae": [
+        "110:99",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "110:99": {
+    "inputs": {
+      "ckpt_name": "juggernautXL_ragnarokBy.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "110:100": {
+    "inputs": {
+      "pixels": [
+        "110:104",
+        0
+      ],
+      "vae": [
+        "110:99",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "110:101": {
+    "inputs": {
+      "background": false,
+      "skin": true,
+      "nose": true,
+      "eye_g": false,
+      "r_eye": false,
+      "l_eye": false,
+      "r_brow": false,
+      "l_brow": false,
+      "r_ear": false,
+      "l_ear": false,
+      "mouth": false,
+      "u_lip": false,
+      "l_lip": false,
+      "hair": false,
+      "hat": false,
+      "ear_r": false,
+      "neck_l": false,
+      "neck": false,
+      "cloth": false,
+      "result": [
+        "110:94",
+        1
+      ]
+    },
+    "class_type": "FaceParsingResultsParser(FaceParsing)",
+    "_meta": {
+      "title": "FaceParsingResultsParser(FaceParsing)"
+    }
+  },
+  "110:102": {
+    "inputs": {
+      "kernel_size": 10,
+      "sigma": 15,
+      "mask": [
+        "110:101",
+        0
+      ]
+    },
+    "class_type": "ImpactGaussianBlurMask",
+    "_meta": {
+      "title": "Gaussian Blur Mask"
+    }
+  },
+  "110:103": {
+    "inputs": {
+      "x": 0,
+      "y": 0,
+      "resize_source": false,
+      "destination": [
+        "110:104",
+        0
+      ],
+      "source": [
+        "110:98",
+        0
+      ],
+      "mask": [
+        "110:102",
+        0
+      ]
+    },
+    "class_type": "ImageCompositeMasked",
+    "_meta": {
+      "title": "ImageCompositeMasked"
+    }
+  },
+  "110:104": {
+    "inputs": {
+      "top": [
+        "110:93",
+        1
+      ],
+      "left": [
+        "110:93",
+        0
+      ],
+      "right": [
+        "110:93",
+        2
+      ],
+      "bottom": [
+        "110:93",
+        3
+      ],
+      "image": [
+        "109",
+        0
+      ]
+    },
+    "class_type": "Image Crop Location",
+    "_meta": {
+      "title": "Image Crop Location"
+    }
+  },
+  "110:105": {
+    "inputs": {
+      "crop_blending": 0.25,
+      "crop_sharpening": 0,
+      "image": [
+        "109",
+        0
+      ],
+      "crop_image": [
+        "110:103",
+        0
+      ],
+      "crop_data": [
+        "110:104",
+        1
+      ]
+    },
+    "class_type": "Image Paste Crop",
+    "_meta": {
+      "title": "Image Paste Crop"
+    }
+  },
+  "110:107": {
+    "inputs": {
+      "text": "plastic skin, waxy skin, oversmoothed, blurry skin,\nairbrushed, fake skin, artificial texture,\ndeformed face, bad anatomy, freckles, skin spots, blemishes, noise skin, dirty skin texture",
+      "clip": [
+        "110:99",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "110:108": {
+    "inputs": {
+      "seed": 87325846877555,
+      "steps": 50,
+      "cfg": 3.8,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "karras",
+      "denoise": 0.3,
+      "model": [
+        "110:99",
+        0
+      ],
+      "positive": [
+        "110:97",
+        0
+      ],
+      "negative": [
+        "110:107",
+        0
+      ],
+      "latent_image": [
+        "110:100",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  }
+}
