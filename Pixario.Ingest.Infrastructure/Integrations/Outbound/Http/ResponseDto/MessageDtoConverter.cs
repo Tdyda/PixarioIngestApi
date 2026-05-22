@@ -13,7 +13,7 @@ public class MessageDtoConverter : JsonConverter<MessageDto>
 
         reader.Read();
 
-        var data = JsonSerializer.Deserialize<MessageDataDto>(ref reader, options);
+        var data = JsonSerializer.Deserialize<MessageDataDto>(ref reader, options) ?? throw new JsonException("Data is null");;
 
         reader.Read();
 

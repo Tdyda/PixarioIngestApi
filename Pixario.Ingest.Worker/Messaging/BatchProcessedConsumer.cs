@@ -42,9 +42,12 @@ public class BatchProcessedConsumer(
                 var response = await handler.Handle(msg, ct);
                 var body = await response.Content.ReadAsStringAsync(ct);
 
-                log.LogDebug("Status: {StatusCode}, body: {Body}", response.StatusCode,
-                    JsonSerializer.Serialize(JsonSerializer.Deserialize<object>(body),
-                        new JsonSerializerOptions { WriteIndented = true }));
+                log.LogDebug(
+                    "Status: {StatusCode}, Content-Type: {ContentType}, body: {Body}",
+                    response.StatusCode,
+                    response.Content.Headers.ContentType?.ToString(),
+                    body
+                );
 
                 await _channel.BasicAckAsync(ea.DeliveryTag, false, ct);
             }
