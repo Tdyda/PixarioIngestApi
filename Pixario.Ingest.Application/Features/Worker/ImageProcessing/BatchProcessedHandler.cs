@@ -20,7 +20,7 @@ public class BatchProcessedHandler(
         {
             return await gateway.ProcessAsync(batch, ct);
         }
-        catch (Exception ex)
+        catch (PermanentProcessingException ex)
         {
             batch.BatchFailedReason = ex.Message;
             await batchRepository.UpdateAsync(batch, ct);
