@@ -26,7 +26,7 @@ namespace Pixario.Ingest.Worker.Extensions;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection ConfigureServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection ConfigureServices(this IServiceCollection services, IHostEnvironment environment, IConfiguration configuration)
     {
         services.AddTransient<PixarioBatchProcessedPayloadBuilder>();
         
@@ -71,7 +71,19 @@ public static class DependencyInjection
         services.AddHostedService<BatchProcessedConsumer>();
         services.AddHostedService<BatchProcessedDlqConsumer>();
 
-        services.AddHttpClient("callbacks");
+        if (environment.IsDevelopment())
+        {
+            services.AddHttpClient<PixarioBatchProcessedCallbackSender>()
+                .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback =
+                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                });
+        }
+        else
+        {
+            services.AddHttpClient<PixarioBatchProcessedCallbackSender>();
+        }
 
         return services;
     }
