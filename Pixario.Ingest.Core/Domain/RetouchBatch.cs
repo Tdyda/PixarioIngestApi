@@ -6,24 +6,28 @@ public sealed record RetouchBatch
 {
     private readonly List<RetouchJob> _jobs = [];
 
-    private RetouchBatch(Guid id)
+    private RetouchBatch(Guid id, Guid galleryId)
     {
         Id = id;
+        GalleryId = galleryId;
     }
 
     private RetouchBatch(
         Guid id,
         IReadOnlyCollection<RetouchJob> jobs,
         JobStatus status,
+        Guid galleryId,
         string? batchFailedReason = null)
     {
         Id = id;
-        Status = status;
         _jobs.AddRange(jobs);
+        Status = status;
+        GalleryId = galleryId;
         BatchFailedReason = batchFailedReason;
     }
 
     public Guid Id { get; }
+    public Guid GalleryId { get; }
     public IReadOnlyCollection<RetouchJob> Jobs => _jobs;
     public JobStatus Status { get; private set; }
     public string? BatchFailedReason { get; set; }
@@ -58,17 +62,18 @@ public sealed record RetouchBatch
         return _jobs;
     }
 
-    public static RetouchBatch Create(Guid id)
+    public static RetouchBatch Create(Guid id, Guid galleryId)
     {
-        return new RetouchBatch(id);
+        return new RetouchBatch(id, galleryId);
     }
 
     public static RetouchBatch Create(
         Guid id,
         IReadOnlyCollection<RetouchJob> jobs,
         JobStatus status,
+        Guid galleryId,
         string? batchFailedReason = null)
     {
-        return new RetouchBatch(id, jobs, status, batchFailedReason);
+        return new RetouchBatch(id, jobs, status, galleryId, batchFailedReason);
     }
 }

@@ -10,7 +10,6 @@ namespace Pixario.Ingest.Application.Features.Worker.ImageProcessing;
 
 public class ProcessBatchHandler(
     IImageProcessingGateway gateway,
-    IJobRepository jobRepository,
     IBatchRepository batchRepository,
     IUnitOfWork unitOfWork,
     ICheckImageProcessingStatusPublisher publisher,
@@ -43,9 +42,9 @@ public class ProcessBatchHandler(
 
             log.LogDebug("Publishing BatchProcessedMessage for batch {batchId} to RabbitMQ", msg.BatchId);
             await notifier.PublishAsync(new BatchProcessedMessage
-            {
-                BatchId = msg.BatchId
-            }, ct);
+            (
+                msg.BatchId
+            ), ct);
             log.LogInformation("BatchProcessedMessage for batch {batchId} published to RabbitMQ", msg.BatchId);
 
             return;
@@ -56,13 +55,12 @@ public class ProcessBatchHandler(
 
         log.LogDebug("Publishing CheckImageStatusMessage for job {jobId} to RabbitMQ", nextJob.Id);
         await publisher.PublishAsync(
-            new CheckImageStatusMessage
-            {
-                BatchId = msg.BatchId,
-                JobId = nextJob.Id,
-                PromptId = promptId,
-                CompletedAt = DateTime.UtcNow
-            }, ct);
+            new CheckImageStatusMessage(
+                msg.BatchId,
+                nextJob.Id,
+                promptId,
+                DateTime.UtcNow
+            ), ct);
         log.LogInformation("CheckImageStatusMessage for job {jobId} published to RabbitMQ", nextJob.Id);
     }
 }

@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Logging;
 using Pixario.Ingest.Application.Messages;
 using Pixario.Ingest.Application.Ports.Messaging;
@@ -15,13 +16,18 @@ public class CreateJobCommandHandler(
     IUnitOfWork unitOfWork,
     ILogger<CreateJobCommandHandler> log)
 {
-    public async Task<Guid> Handle(CreateJobCommand request, CancellationToken ct)
+    public async Task<Guid> Handle(CreateJobCommand command, CancellationToken ct)
     {
         var batchId = Guid.CreateVersion7();
-        var batch = RetouchBatch.Create(batchId);
+        if (!Guid.TryParse(command.GalleryId, out var galleryId))
+        {
+            throw new ValidationException("Invalid galleryId");
+        }
+
+        var batch = RetouchBatch.Create(batchId, galleryId);
         log.LogInformation("Created batch: {batchId}", batchId);
 
-        foreach (var file in request.Files)
+        foreach (var file in command.Files)
         {
             var imageId = Guid.CreateVersion7();
             var path = await fileStorage.SaveAsync(file.Content, imageId.ToString(), ct);
@@ -40,9 +46,9 @@ public class CreateJobCommandHandler(
 
         log.LogDebug("Publishing ProcessBatchMessage for batch {batchId} to RabbitMQ", batch.Id);
         await publisher.PublishAsync(new ProcessBatchMessage
-        {
-            BatchId = batchId
-        }, ct);
+        (
+            batchId
+        ), ct);
         log.LogInformation("ProcessBatchMessage for batch {batchId} published to RabbitMQ", batch.Id);
         return batchId;
     }

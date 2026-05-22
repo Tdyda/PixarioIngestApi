@@ -65,9 +65,9 @@ public class CheckImageStatusHandler(
     {
         log.LogDebug("Publishing ProcessBatchMessage for batch {batchId} to RabbitMQ", batchId);
         await publisher.PublishAsync(new ProcessBatchMessage
-        {
-            BatchId = batchId
-        }, ct);
+        (
+            batchId
+        ), ct);
         log.LogInformation("ProcessBatchMessage for batch {batchId} published to RabbitMQ", batchId);
     }
 }

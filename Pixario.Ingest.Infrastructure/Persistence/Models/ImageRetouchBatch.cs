@@ -9,18 +9,20 @@ public class ImageRetouchBatch
     {
     }
 
-    public ImageRetouchBatch(Guid id, IReadOnlyCollection<ImageRetouchJob> jobs, string? batchFailedReason = null)
+    public ImageRetouchBatch(Guid id, IReadOnlyCollection<ImageRetouchJob> jobs, Guid galleryId, string? batchFailedReason = null)
     {
         Id = id;
         Jobs = jobs;
-        CreatedAt = DateTime.UtcNow;
         Status = JobStatus.Queued;
+        GalleryId = galleryId;
         BatchFailedReason = batchFailedReason;
+        CreatedAt = DateTime.UtcNow;
     }
 
     public Guid Id { get; private set; }
     public IReadOnlyCollection<ImageRetouchJob> Jobs { get; private set; } = null!;
     public JobStatus Status { get; set; }
+    public Guid GalleryId { get; }
     public string? BatchFailedReason { get; set; }
     public DateTime CreatedAt { get; private set; }
 }

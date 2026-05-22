@@ -19,6 +19,7 @@ public class IngestDbContext(DbContextOptions<IngestDbContext> options) : DbCont
             b.HasKey(x => x.Id);
 
             b.Property(x => x.Id).HasColumnName("id");
+            b.Property(x => x.GalleryId).HasColumnName("gallery_id");
             b.Property(x => x.Status).HasColumnName("status").HasConversion<string>();
             b.Property(x => x.BatchFailedReason).HasColumnName("batch_failed_reason").HasMaxLength(50);
             b.Property(x => x.CreatedAt).HasColumnName("created_at");

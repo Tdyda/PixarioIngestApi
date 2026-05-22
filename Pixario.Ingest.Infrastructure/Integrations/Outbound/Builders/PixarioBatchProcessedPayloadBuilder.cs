@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pixario.Ingest.Application.Ports.Storage;
 using Pixario.Ingest.Core.Domain;
@@ -28,8 +29,6 @@ public class PixarioBatchProcessedPayloadBuilder(
 
     public async Task<PixarioBatchProcessedPayloadBuilder> AddFilesAsync(RetouchBatch batch)
     {
-        _content.Add(new StringContent(batch.Id.ToString()), "batchId");
-
         if (batch.Jobs.All(j => j.Status != JobStatus.Done))
             throw new ExternalServiceBadRequestException("No files to upload.");
 
@@ -49,6 +48,8 @@ public class PixarioBatchProcessedPayloadBuilder(
 
     public Task<PixarioBatchProcessedPayloadBuilder> AddResultsMapAsync(RetouchBatch batch)
     {
+        _content.Add(new StringContent(batch.GalleryId.ToString()), "galleryId");
+        
         List<FileProcessResult> results = [];
         results.AddRange(
             batch.Jobs.Select(job =>

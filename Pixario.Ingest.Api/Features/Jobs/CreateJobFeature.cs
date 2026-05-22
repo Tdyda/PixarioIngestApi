@@ -19,7 +19,8 @@ public static class CreateJobFeature
                             f.Content,
                             f.FileName,
                             f.Size
-                        ))
+                        )),
+                        request.GalleryId
                     ), ct);
 
                 return Results.Accepted($"/uploads/images/{jobId}", new { jobId });
