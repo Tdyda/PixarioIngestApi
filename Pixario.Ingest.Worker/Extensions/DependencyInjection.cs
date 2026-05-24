@@ -71,7 +71,7 @@ public static class DependencyInjection
         services.AddHostedService<BatchProcessedConsumer>();
         services.AddHostedService<BatchProcessedDlqConsumer>();
 
-        if (environment.IsDevelopment())
+        if (!environment.IsProduction())
         {
             services.AddHttpClient<PixarioBatchProcessedCallbackSender>()
                 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler

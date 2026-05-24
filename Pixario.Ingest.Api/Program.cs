@@ -8,6 +8,8 @@ builder.AddPixarioLogging();
 
 var app = builder.Build();
 
+await app.ApplyMigrationsAsync();
+
 await app.UsePipeline();
 
 app.Run();

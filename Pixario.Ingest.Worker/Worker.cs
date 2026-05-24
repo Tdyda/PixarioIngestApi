@@ -1,15 +1,20 @@
 using Pixario.Ingest.Application.Features.Logging.Get;
 using Pixario.Ingest.Core.Enums;
+using Pixario.Ingest.Infrastructure.Persistence;
+using Pixario.Ingest.Worker.Extensions;
 
 namespace Pixario.Ingest.Worker;
 
 public class Worker(
     LogLevelService svc,
     IServiceScopeFactory scopeFactory,
-    ILogger<Worker> logger) : BackgroundService
+    ILogger<Worker> logger,
+    IServiceProvider services) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
+        await services.ApplyMigrationsAsync<IngestDbContext>();
+        
         while (!ct.IsCancellationRequested)
         {
             try

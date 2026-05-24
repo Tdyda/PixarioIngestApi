@@ -1,19 +1,19 @@
 <Solution>
-    <Folder Name="/SolutionItems/">
-        <File Path=".env" />
-        <File Path=".env.example" />
-        <File Path=".gitignore" />
-        <File Path="beauty_retouch.json" />
-        <File Path="comfyui\Dockerfile" />
-        <File Path="docker-compose.yml" />
-        <File Path="Makefile" />
-        <File Path="scripts\docker.sh" />
-        <File Path="scripts\gh-create-labels-and-issues.sh" />
-        <File Path="scripts\git-commit-by-issues.sh" />
-    </Folder>
-    <Project Path="Pixario.Ingest.Api/Pixario.Ingest.Api.csproj" />
-    <Project Path="Pixario.Ingest.Application/Pixario.Ingest.Application.csproj" />
-    <Project Path="Pixario.Ingest.Core/Pixario.Ingest.Core.csproj" />
-    <Project Path="Pixario.Ingest.Infrastructure/Pixario.Ingest.Infrastructure.csproj" />
-    <Project Path="Pixario.Ingest.Worker/Pixario.Ingest.Worker.csproj" />
+  <Folder Name="/SolutionItems/">
+    <File Path=".env.example" />
+    <File Path=".gitignore" />
+    <File Path="beauty_retouch.json" />
+    <File Path="comfyui\Dockerfile" />
+    <File Path="docker-compose.yml" />
+    <File Path="Makefile" />
+    <File Path="scripts\docker.sh" />
+    <File Path="scripts\gh-create-labels-and-issues.sh" />
+    <File Path="scripts\git-commit-by-issues.sh" />
+    <File Path=".env" />
+  </Folder>
+  <Project Path="Pixario.Ingest.Api/Pixario.Ingest.Api.csproj" />
+  <Project Path="Pixario.Ingest.Application/Pixario.Ingest.Application.csproj" />
+  <Project Path="Pixario.Ingest.Core/Pixario.Ingest.Core.csproj" />
+  <Project Path="Pixario.Ingest.Infrastructure/Pixario.Ingest.Infrastructure.csproj" />
+  <Project Path="Pixario.Ingest.Worker/Pixario.Ingest.Worker.csproj" />
 </Solution>
